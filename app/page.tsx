@@ -1,0 +1,263 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { SITES, DevelopmentSite, SiteStatus } from "../data/sites";
+
+const STATUS_CONFIG: Record<SiteStatus, { label: string; color: string; dot: string }> = {
+  proposed:           { label: "Proposed",          color: "bg-amber-100 text-amber-800 border-amber-200",  dot: "#f59e0b" },
+  planned:            { label: "Planned",            color: "bg-blue-100 text-blue-800 border-blue-200",    dot: "#3b82f6" },
+  "under-construction": { label: "Under Construction", color: "bg-orange-100 text-orange-800 border-orange-200", dot: "#f97316" },
+  completed:          { label: "Completed",          color: "bg-green-100 text-green-800 border-green-200", dot: "#22c55e" },
+};
+
+function StatusBadge({ status }: { status: SiteStatus }) {
+  const cfg = STATUS_CONFIG[status];
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${cfg.color}`}>
+      <span className="w-1.5 h-1.5 rounded-full" style={{ background: cfg.dot }} />
+      {cfg.label}
+    </span>
+  );
+}
+
+export default function Page() {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<any>(null);
+  const markersRef = useRef<Record<string, any>>({});
+  const [selected, setSelected] = useState<DevelopmentSite | null>(null);
+  const [pdfOpen, setPdfOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const selectedRef = useRef<DevelopmentSite | null>(null);
+  selectedRef.current = selected;
+
+  useEffect(() => {
+    if (!mapRef.current || mapInstanceRef.current) return;
+
+    function initMap(L: any) {
+      const map = L.map(mapRef.current!, { scrollWheelZoom: true }).setView(
+        [35.2226, -97.4395],
+        13
+      );
+      mapInstanceRef.current = map;
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 19,
+      }).addTo(map);
+
+      SITES.forEach((site) => {
+        const cfg = STATUS_CONFIG[site.status];
+        const icon = L.divIcon({
+          className: "",
+          html: `<div style="width:14px;height:14px;background:${cfg.dot};border:2.5px solid white;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.35)"></div>`,
+          iconSize: [14, 14],
+          iconAnchor: [7, 7],
+        });
+
+        const marker = L.marker([site.lat, site.lng], { icon }).addTo(map);
+        marker.on("click", () => {
+          setSelected(site);
+          setSidebarOpen(true);
+        });
+        markersRef.current[site.id] = marker;
+      });
+    }
+
+    if (!document.querySelector("#leaflet-css")) {
+      const link = document.createElement("link");
+      link.id = "leaflet-css";
+      link.rel = "stylesheet";
+      link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+      document.head.appendChild(link);
+    }
+
+    if ((window as any).L) {
+      initMap((window as any).L);
+    } else {
+      const script = document.createElement("script");
+      script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+      script.onload = () => initMap((window as any).L);
+      document.head.appendChild(script);
+    }
+
+    return () => {
+      mapInstanceRef.current?.remove();
+      mapInstanceRef.current = null;
+    };
+  }, []);
+
+  function flyTo(site: DevelopmentSite) {
+    setSelected(site);
+    setSidebarOpen(true);
+    mapInstanceRef.current?.flyTo([site.lat, site.lng], 16, { duration: 0.8 });
+  }
+
+  const sans = { fontFamily: "Arial, Helvetica, sans-serif" };
+
+  return (
+    <div className="flex flex-col h-screen bg-white overflow-hidden" style={sans}>
+      {/* HEADER */}
+      <header className="shrink-0 border-b border-black/10 bg-white px-4 py-3 flex items-center justify-between z-50">
+        <div className="flex items-center gap-3">
+          <a
+            href="https://normanokdevelopment.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 hover:opacity-75 transition-opacity"
+          >
+            <span className="font-bold text-sm text-neutral-900 tracking-tight">Norman Development</span>
+            <span className="text-black/30 text-xs">↗</span>
+          </a>
+          <span className="text-black/20 text-sm">|</span>
+          <span className="text-sm font-medium text-neutral-600">Development Map</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-2 text-xs text-black/50">
+            {(Object.entries(STATUS_CONFIG) as [SiteStatus, typeof STATUS_CONFIG[SiteStatus]][]).map(([key, cfg]) => (
+              <span key={key} className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full inline-block" style={{ background: cfg.dot }} />
+                {cfg.label}
+              </span>
+            ))}
+          </div>
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="rounded-lg border border-black/15 px-3 py-1.5 text-xs font-medium hover:bg-black/5 transition-colors"
+          >
+            {sidebarOpen ? "Hide list" : "Show list"}
+          </button>
+        </div>
+      </header>
+
+      {/* BODY */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* SIDEBAR */}
+        {sidebarOpen && (
+          <aside className="w-72 shrink-0 border-r border-black/10 bg-white flex flex-col overflow-hidden">
+            <div className="px-4 py-3 border-b border-black/10 flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-widest text-black/40">
+                {SITES.length} sites
+              </span>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              {SITES.map((site) => {
+                const cfg = STATUS_CONFIG[site.status];
+                const isActive = selected?.id === site.id;
+                return (
+                  <button
+                    key={site.id}
+                    onClick={() => flyTo(site)}
+                    className={`w-full text-left px-4 py-3.5 border-b border-black/5 transition-colors ${
+                      isActive ? "bg-neutral-100" : "hover:bg-black/[0.03]"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="text-sm font-semibold text-neutral-900 leading-snug">{site.name}</span>
+                      <span className="w-2.5 h-2.5 rounded-full shrink-0 mt-1" style={{ background: cfg.dot }} />
+                    </div>
+                    <div className="mt-1 text-xs text-black/50 truncate">{site.address}</div>
+                    <div className="mt-1.5">
+                      <StatusBadge status={site.status} />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </aside>
+        )}
+
+        {/* MAP */}
+        <div className="relative flex-1">
+          <div ref={mapRef} className="w-full h-full" />
+
+          {/* DETAIL PANEL */}
+          {selected && (
+            <div className="absolute bottom-0 left-0 right-0 sm:bottom-4 sm:left-4 sm:right-auto sm:w-96 bg-white border border-black/10 rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden z-[1000]">
+              <div className="flex items-start justify-between gap-3 px-5 pt-5 pb-3">
+                <div>
+                  <StatusBadge status={selected.status} />
+                  <h2 className="mt-2 text-base font-bold text-neutral-900 leading-snug">{selected.name}</h2>
+                  <p className="mt-0.5 text-xs text-black/50">{selected.address}</p>
+                </div>
+                <button
+                  onClick={() => setSelected(null)}
+                  className="shrink-0 rounded-full w-7 h-7 flex items-center justify-center text-black/40 hover:bg-black/10 transition-colors text-sm mt-0.5"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="px-5 pb-2">
+                <p className="text-sm text-neutral-700 leading-6">{selected.description}</p>
+              </div>
+
+              {selected.articles.length > 0 && (
+                <div className="px-5 pb-3">
+                  <div className="text-xs font-semibold uppercase tracking-widest text-black/40 mb-2">Coverage</div>
+                  <div className="space-y-1.5">
+                    {selected.articles.map((a) => (
+                      <a
+                        key={a.url}
+                        href={a.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-start gap-2 group"
+                      >
+                        <span className="text-blue-600 text-xs mt-0.5 shrink-0">↗</span>
+                        <div>
+                          <div className="text-sm text-blue-600 group-hover:underline leading-snug">{a.title}</div>
+                          <div className="text-xs text-black/40">{a.date}</div>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {selected.planPdf && (
+                <div className="px-5 pb-5">
+                  <button
+                    onClick={() => setPdfOpen(true)}
+                    className="w-full rounded-xl border border-black/15 px-4 py-2.5 text-sm font-medium hover:bg-black/5 transition-colors text-left flex items-center gap-2"
+                  >
+                    <span className="text-black/40">📄</span>
+                    View site plan
+                  </button>
+                </div>
+              )}
+              {!selected.planPdf && (
+                <div className="px-5 pb-5">
+                  <div className="rounded-xl border border-black/10 bg-black/[0.02] px-4 py-2.5 text-xs text-black/40">
+                    No site plan on file yet
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* PDF MODAL */}
+      {pdfOpen && selected?.planPdf && (
+        <div className="fixed inset-0 z-[2000] bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl overflow-hidden w-full max-w-4xl h-[85vh] flex flex-col">
+            <div className="flex items-center justify-between px-5 py-3 border-b border-black/10 shrink-0">
+              <span className="font-semibold text-sm">{selected.name} — Site Plan</span>
+              <button
+                onClick={() => setPdfOpen(false)}
+                className="rounded-full w-8 h-8 flex items-center justify-center hover:bg-black/10 transition-colors text-black/60"
+              >
+                ✕
+              </button>
+            </div>
+            <iframe
+              src={`/plans/${selected.planPdf}`}
+              className="flex-1 w-full"
+              title={`${selected.name} site plan`}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

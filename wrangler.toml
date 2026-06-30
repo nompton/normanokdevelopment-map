@@ -1,0 +1,4 @@
+name = "normanokdevelopment-map"
+
+[assets]
+directory = "out"
