@@ -37,6 +37,23 @@ export interface DevelopmentSite {
 
 export const SITES: DevelopmentSite[] = [
   {
+    id: "wendys-south-norman",
+    name: "Wendy's — South Norman (original site)",
+    address: "S Norman, OK",
+    lat: 35.18625777867005,
+    lng: -97.42078121230038,
+    status: "cancelled",
+    description: "Wendy's was set to join OnCue in a South Norman development but did not proceed at this location — moved to a different site in the area.",
+    articles: [
+      {
+        title: "Wendy's Set to Join OnCue in South Norman Development",
+        url: "https://www.normanokdevelopment.com/2018/04/01/wendys-set-to-join-oncue-in-south-norman-development/",
+        date: "April 1, 2018",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "hotel-unp",
     name: "Hotel — University North Park",
     address: "University North Park, Norman, OK",
