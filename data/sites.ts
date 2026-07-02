@@ -247,7 +247,7 @@ export const SITES: DevelopmentSite[] = [
   },
   {
     id: "1300-w-lindsey",
-    name: "1300 W Lindsey — Redevelopment",
+    name: "Retail Strip — 1300 W Lindsey",
     address: "1300 W Lindsey St, Norman, OK",
     lat: 35.20336714520037,
     lng: -97.46110782905495,
@@ -264,7 +264,7 @@ export const SITES: DevelopmentSite[] = [
   },
   {
     id: "1209-w-lindsey",
-    name: "1209 W Lindsey — Redevelopment",
+    name: "Retail Strip — 1209 W Lindsey",
     address: "1209 W Lindsey St, Norman, OK",
     lat: 35.20420558044441,
     lng: -97.45968495645249,
@@ -281,7 +281,7 @@ export const SITES: DevelopmentSite[] = [
   },
   {
     id: "1035-s-berry",
-    name: "1035 S Berry — Redevelopment",
+    name: "Mama Roja — 1035 S Berry",
     address: "1035 S Berry Rd, Norman, OK",
     lat: 35.204230269911825,
     lng: -97.45863115923154,
@@ -541,7 +541,7 @@ export const SITES: DevelopmentSite[] = [
   },
   {
     id: "tea-franchise-west-lindsey",
-    name: "Local Tea Franchise — West Lindsey",
+    name: "HTeaO — West Lindsey",
     address: "W Lindsey St, Norman, OK",
     lat: 35.20425687404181,
     lng: -97.46870569686915,
@@ -609,7 +609,7 @@ export const SITES: DevelopmentSite[] = [
   },
   {
     id: "salad-chain-main-street",
-    name: "Salad Chain — Main Street Redevelopment",
+    name: "Salad & Go — Main Street (Cancelled)",
     address: "W Main St, Norman, OK",
     lat: 35.21818517027543,
     lng: -97.45930024686974,
@@ -711,7 +711,7 @@ export const SITES: DevelopmentSite[] = [
   },
   {
     id: "student-housing-ou-motel",
-    name: "Student Housing — Former OU Motel Site",
+    name: "Verve Norman — Former OU Motel Site (Cancelled)",
     address: "E Lindsey St, Norman, OK",
     lat: 35.19473606750907,
     lng: -97.42594382970297,
@@ -745,7 +745,7 @@ export const SITES: DevelopmentSite[] = [
   },
   {
     id: "coffee-chain-location-1",
-    name: "National Coffee Chain — W Main St",
+    name: "Dutch Bros — W Main St",
     address: "W Main St, Norman, OK",
     lat: 35.218840262595286,
     lng: -97.48058571759682,
@@ -762,7 +762,7 @@ export const SITES: DevelopmentSite[] = [
   },
   {
     id: "coffee-chain-location-2",
-    name: "National Coffee Chain — E Lindsey St",
+    name: "Starbucks — E Lindsey St",
     address: "E Lindsey St, Norman, OK",
     lat: 35.23323588883364,
     lng: -97.44267030155936,
@@ -796,7 +796,7 @@ export const SITES: DevelopmentSite[] = [
   },
   {
     id: "taco-chain-lindsey",
-    name: "Dallas Taco Chain — Lindsey Street",
+    name: "Velvet Taco — Lindsey Street",
     address: "W Lindsey St, Norman, OK",
     lat: 35.20348347811404,
     lng: -97.4630553081468,
@@ -813,7 +813,7 @@ export const SITES: DevelopmentSite[] = [
   },
   {
     id: "coffee-chain-main-street",
-    name: "National Coffee Chain — Main Street",
+    name: "Dunkin' — Main Street",
     address: "W Main St, Norman, OK",
     lat: 35.21821820484369,
     lng: -97.45975564535121,
@@ -915,7 +915,7 @@ export const SITES: DevelopmentSite[] = [
   },
   {
     id: "hotel-unp",
-    name: "Hotel — University North Park",
+    name: "Home2 Suites — University North Park",
     address: "University North Park, Norman, OK",
     lat: 35.2463579188148,
     lng: -97.48291447157786,
@@ -949,7 +949,7 @@ export const SITES: DevelopmentSite[] = [
   },
   {
     id: "boutique-hotel-campus-corner",
-    name: "Boutique Hotel — Campus Corner",
+    name: "NOUN Hotel — Campus Corner",
     address: "Campus Corner, Norman, OK",
     lat: 35.2133808481058,
     lng: -97.44613221165325,
@@ -983,7 +983,7 @@ export const SITES: DevelopmentSite[] = [
   },
   {
     id: "oil-change-long-john-silvers",
-    name: "Oil Change Shop — Former Long John Silver's",
+    name: "Take 5 Oil Change — Former Long John Silver's",
     address: "E Lindsey St, Norman, OK",
     lat: 35.21671550146959,
     lng: -97.4241177552962,
