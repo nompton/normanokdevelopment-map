@@ -105,6 +105,23 @@ export const SITES: DevelopmentSite[] = [
     planPdf: undefined,
   },
   {
+    id: "andrews-park-master-plan",
+    name: "Andrews Park Master Plan — Downtown",
+    address: "Andrews Park, Norman, OK",
+    lat: 35.22405409688551,
+    lng: -97.44782649822255,
+    status: "completed",
+    description: "Master plan for Andrews Park presented to city council.",
+    articles: [
+      {
+        title: "Council Presented Master Plan for Andrews Park",
+        url: "https://www.normanokdevelopment.com/2023/12/08/council-presented-master-plan-for-andrews-park/",
+        date: "December 8, 2023",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "arena-unp",
     name: "Arena — University North Park",
     address: "University North Park, Norman, OK",
