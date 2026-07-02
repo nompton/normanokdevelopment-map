@@ -105,6 +105,57 @@ export const SITES: DevelopmentSite[] = [
     planPdf: undefined,
   },
   {
+    id: "1300-w-lindsey",
+    name: "1300 W Lindsey — Redevelopment",
+    address: "1300 W Lindsey St, Norman, OK",
+    lat: 35.20336714520037,
+    lng: -97.46110782905495,
+    status: "completed",
+    description: "Redevelopment at 1300 W Lindsey, part of a revitalization effort along West Lindsey.",
+    articles: [
+      {
+        title: "Three Developments Underway to Revitalize West Lindsey",
+        url: "https://www.normanokdevelopment.com/2025/02/28/three-developments-underway-to-revitalize-west-lindsey/",
+        date: "February 28, 2025",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
+    id: "1209-w-lindsey",
+    name: "1209 W Lindsey — Redevelopment",
+    address: "1209 W Lindsey St, Norman, OK",
+    lat: 35.20420558044441,
+    lng: -97.45968495645249,
+    status: "under-construction",
+    description: "Redevelopment at 1209 W Lindsey, part of a revitalization effort along West Lindsey.",
+    articles: [
+      {
+        title: "Three Developments Underway to Revitalize West Lindsey",
+        url: "https://www.normanokdevelopment.com/2025/02/28/three-developments-underway-to-revitalize-west-lindsey/",
+        date: "February 28, 2025",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
+    id: "1035-s-berry",
+    name: "1035 S Berry — Redevelopment",
+    address: "1035 S Berry Rd, Norman, OK",
+    lat: 35.204230269911825,
+    lng: -97.45863115923154,
+    status: "completed",
+    description: "Redevelopment at 1035 S Berry, part of a revitalization effort along West Lindsey.",
+    articles: [
+      {
+        title: "Three Developments Underway to Revitalize West Lindsey",
+        url: "https://www.normanokdevelopment.com/2025/02/28/three-developments-underway-to-revitalize-west-lindsey/",
+        date: "February 28, 2025",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "quiktrip-norman",
     name: "QuikTrip — Norman",
     address: "W Main St, Norman, OK",
