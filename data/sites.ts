@@ -105,6 +105,23 @@ export const SITES: DevelopmentSite[] = [
     planPdf: undefined,
   },
   {
+    id: "wendys-south-norman-built",
+    name: "Wendy's — South Norman",
+    address: "S Norman, OK",
+    lat: 35.17990169080142,
+    lng: -97.41516244007585,
+    status: "completed",
+    description: "Wendy's location in South Norman that was ultimately built.",
+    articles: [
+      {
+        title: "Wendy's Set to Join OnCue in South Norman Development",
+        url: "https://www.normanokdevelopment.com/2018/04/01/wendys-set-to-join-oncue-in-south-norman-development/",
+        date: "April 1, 2018",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "wendys-south-norman",
     name: "Wendy's — South Norman (original site)",
     address: "S Norman, OK",
