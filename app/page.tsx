@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SITES, DevelopmentSite, SiteStatus } from "../data/sites";
 
 const BRAND = "#3a8a6e";
@@ -130,44 +130,48 @@ export default function Page() {
   }, [baseMap]);
 
   // ── PARCEL OVERLAY ────────────────────────────────────────────────────────
-  const loadParcels = useCallback(async () => {
+  // Keep refs so the moveend handler always has current values without stale closures
+  const showParcelsRef = useRef(false);
+  const baseMapRef = useRef<"street" | "aerial">("street");
+  showParcelsRef.current = showParcels;
+  baseMapRef.current = baseMap;
+
+  async function fetchParcels() {
     const map = mapInstanceRef.current;
     const L = (window as any).L;
-    if (!map || !L || !showParcels) return;
+    if (!map || !L) return;
 
     const bounds = map.getBounds();
-    const bbox = [
-      bounds.getWest(), bounds.getSouth(),
-      bounds.getEast(), bounds.getNorth(),
-    ].join(",");
+    const bbox = [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()].join(",");
+    const color = baseMapRef.current === "aerial" ? "#ffffff" : "#e67e22";
 
     setParcelLoading(true);
     try {
-      const url = `${PARCEL_SERVICE}/query?where=1%3D1&geometry=${bbox}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=GEONUMBER,F_ADD,STREET_NAME,ACREAGE&f=geojson&resultRecordCount=500`;
+      const url =
+        `${PARCEL_SERVICE}/query?where=1%3D1` +
+        `&geometry=${encodeURIComponent(bbox)}&geometryType=esriGeometryEnvelope` +
+        `&inSR=4326&spatialRel=esriSpatialRelIntersects` +
+        `&outFields=F_ADD,STREET_NAME&f=geojson&resultRecordCount=500`;
       const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const geojson = await res.json();
 
-      if (parcelLayerRef.current) map.removeLayer(parcelLayerRef.current);
+      if (parcelLayerRef.current) { map.removeLayer(parcelLayerRef.current); parcelLayerRef.current = null; }
+      if (!showParcelsRef.current) return; // toggled off while fetching
       parcelLayerRef.current = L.geoJSON(geojson, {
-        style: {
-          color: baseMap === "aerial" ? "#ffffff" : "#e67e22",
-          weight: 1,
-          opacity: 0.7,
-          fillOpacity: 0.08,
-          fillColor: baseMap === "aerial" ? "#ffffff" : "#e67e22",
-        },
+        style: { color, weight: 1, opacity: 0.8, fillOpacity: 0.05, fillColor: color },
         onEachFeature: (feature: any, layer: any) => {
           const p = feature.properties;
           if (p?.STREET_NAME) {
-            layer.bindTooltip(`${p.F_ADD || ""} ${p.STREET_NAME}`.trim(), { sticky: true, className: "text-xs" });
+            layer.bindTooltip(`${p.F_ADD ?? ""} ${p.STREET_NAME}`.trim(), { sticky: true });
           }
         },
       }).addTo(map);
     } catch (e) {
-      console.error("Parcel load error", e);
+      console.error("Parcel fetch error", e);
     }
     setParcelLoading(false);
-  }, [showParcels, baseMap]);
+  }
 
   useEffect(() => {
     const map = mapInstanceRef.current;
@@ -176,14 +180,16 @@ export default function Page() {
       if (parcelLayerRef.current) { map.removeLayer(parcelLayerRef.current); parcelLayerRef.current = null; }
       return;
     }
-    loadParcels();
-    map.on("moveend", loadParcels);
-    return () => { map.off("moveend", loadParcels); };
-  }, [showParcels, loadParcels]);
+    fetchParcels();
+    map.on("moveend", fetchParcels);
+    return () => { map.off("moveend", fetchParcels); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showParcels]);
 
-  // Update parcel color when base layer changes
+  // Reload parcels when base layer changes (color needs to update)
   useEffect(() => {
-    if (showParcels) loadParcels();
+    if (showParcelsRef.current) fetchParcels();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [baseMap]);
 
   // ── HELPERS ───────────────────────────────────────────────────────────────
