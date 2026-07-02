@@ -37,7 +37,7 @@ export default function Page() {
 
   const [selected, setSelected] = useState<DevelopmentSite | null>(null);
   const [pdfOpen, setPdfOpen] = useState(false);
-  const [listOpen, setListOpen] = useState(false);
+  const [listOpen, setListOpen] = useState(true);
   const [activeFilters, setActiveFilters] = useState<Set<SiteStatus>>(new Set(ALL_STATUSES));
   const [search, setSearch] = useState("");
   const [baseMap, setBaseMap] = useState<"street" | "aerial">("street");
@@ -338,7 +338,7 @@ export default function Page() {
         {listOpen && (
           <div className="md:hidden absolute inset-0 z-30 flex flex-col justify-end">
             <div className="absolute inset-0 bg-black/30" onClick={() => setListOpen(false)} />
-            <div className="relative bg-white rounded-t-2xl flex flex-col overflow-hidden" style={{ maxHeight: "75vh" }}>
+            <div className="relative bg-white rounded-t-2xl flex flex-col overflow-hidden" style={{ maxHeight: "55vh" }}>
               <div className="flex items-center justify-between px-4 py-3 border-b border-black/10 shrink-0">
                 <span className="text-sm font-semibold">Development Sites</span>
                 <button onClick={() => setListOpen(false)} className="text-black/40 text-lg w-8 h-8 flex items-center justify-center">✕</button>
