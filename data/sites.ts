@@ -37,6 +37,23 @@ export interface DevelopmentSite {
 
 export const SITES: DevelopmentSite[] = [
   {
+    id: "panda-express-south-norman",
+    name: "Panda Express — South Norman",
+    address: "S Norman, OK",
+    lat: 35.181774595791396,
+    lng: -97.41624969901233,
+    status: "completed",
+    description: "Panda Express location in South Norman.",
+    articles: [
+      {
+        title: "Panda Express Coming to South Norman",
+        url: "https://www.normanokdevelopment.com/2018/11/13/panda-express-coming-to-south-norman/",
+        date: "November 13, 2018",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "wendys-south-norman",
     name: "Wendy's — South Norman (original site)",
     address: "S Norman, OK",
