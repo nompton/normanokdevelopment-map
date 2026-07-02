@@ -105,6 +105,57 @@ export const SITES: DevelopmentSite[] = [
     planPdf: undefined,
   },
   {
+    id: "tea-franchise-west-lindsey",
+    name: "Local Tea Franchise — West Lindsey",
+    address: "W Lindsey St, Norman, OK",
+    lat: 35.20425687404181,
+    lng: -97.46870569686915,
+    status: "completed",
+    description: "Local tea franchisee purchased and developed a West Lindsey Street site.",
+    articles: [
+      {
+        title: "Local Tea Franchisee Purchases West Lindsey Site",
+        url: "https://www.normanokdevelopment.com/2023/10/14/local-tea-franchisee-purchases-west-lindsey-site/",
+        date: "October 14, 2023",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
+    id: "home-creations-sooner-village",
+    name: "Sooner Village — Home Creations",
+    address: "S Norman, OK",
+    lat: 35.17725350832845,
+    lng: -97.43915923169685,
+    status: "under-construction",
+    description: "New residential development by Home Creations owners at Sooner Village.",
+    articles: [
+      {
+        title: "Home Creations Owners Propose Two New Developments",
+        url: "https://www.normanokdevelopment.com/2023/10/21/home-creations-owners-propose-two-new-developments/",
+        date: "October 21, 2023",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
+    id: "home-creations-whispering-hills",
+    name: "Whispering Hills — Home Creations",
+    address: "N Norman, OK",
+    lat: 35.29344138304551,
+    lng: -97.50917599309534,
+    status: "under-construction",
+    description: "New residential development by Home Creations owners at Whispering Hills.",
+    articles: [
+      {
+        title: "Home Creations Owners Propose Two New Developments",
+        url: "https://www.normanokdevelopment.com/2023/10/21/home-creations-owners-propose-two-new-developments/",
+        date: "October 21, 2023",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "norman-transit-center",
     name: "Norman Transit Center — Downtown",
     address: "Downtown Norman, OK",
