@@ -32,6 +32,23 @@ export interface DevelopmentSite {
 
 export const SITES: DevelopmentSite[] = [
   {
+    id: "office-36th-avenue",
+    name: "Office Development — 36th Avenue",
+    address: "36th Ave NW, Norman, OK",
+    lat: 35.22761826968824,
+    lng: -97.49413516827539,
+    status: "cancelled",
+    description: "Proposed office development fronting 36th Avenue in Norman.",
+    articles: [
+      {
+        title: "New Office Development to Front 36th Avenue",
+        url: "https://www.normanokdevelopment.com/2018/01/23/new-office-development-to-front-36th-avenue/",
+        date: "January 23, 2018",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "chickfila-east-norman",
     name: "Chick-fil-A — East Norman",
     address: "East Norman, OK",
