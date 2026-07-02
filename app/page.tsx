@@ -3,12 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { SITES, DevelopmentSite, SiteStatus } from "../data/sites";
 
-const STATUS_CONFIG: Record<SiteStatus, { label: string; color: string; dot: string }> = {
-  proposed:             { label: "Proposed",           color: "bg-amber-100 text-amber-800 border-amber-200",        dot: "#f59e0b" },
-  planned:              { label: "Planned",             color: "bg-blue-100 text-blue-800 border-blue-200",          dot: "#3b82f6" },
-  "under-construction": { label: "Under Construction",  color: "bg-orange-100 text-orange-800 border-orange-200",    dot: "#f97316" },
-  completed:            { label: "Completed",           color: "bg-green-100 text-green-800 border-green-200",       dot: "#22c55e" },
-  cancelled:            { label: "Cancelled",           color: "bg-neutral-100 text-neutral-500 border-neutral-200", dot: "#9ca3af" },
+const STATUS_CONFIG: Record<SiteStatus, { label: string; color: string; dot: string; tip: string }> = {
+  proposed:             { label: "Proposed",           color: "bg-amber-100 text-amber-800 border-amber-200",        dot: "#f59e0b", tip: "Announced or rumored — no city filing yet" },
+  planned:              { label: "Planned",             color: "bg-blue-100 text-blue-800 border-blue-200",          dot: "#3b82f6", tip: "Platted, city council approved, or permits filed" },
+  "under-construction": { label: "Under Construction",  color: "bg-orange-100 text-orange-800 border-orange-200",    dot: "#f97316", tip: "Actively being built" },
+  completed:            { label: "Completed",           color: "bg-green-100 text-green-800 border-green-200",       dot: "#22c55e", tip: "Open / finished" },
+  cancelled:            { label: "Cancelled",           color: "bg-neutral-100 text-neutral-500 border-neutral-200", dot: "#9ca3af", tip: "Officially withdrawn or abandoned" },
 };
 
 const ALL_STATUSES = Object.keys(STATUS_CONFIG) as SiteStatus[];
@@ -186,6 +186,7 @@ export default function Page() {
                   <button
                     key={status}
                     onClick={() => toggleFilter(status)}
+                    title={cfg.tip}
                     className={`w-full flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs transition-all border ${
                       active ? "border-black/15 bg-white" : "border-transparent bg-black/[0.02] opacity-40"
                     }`}

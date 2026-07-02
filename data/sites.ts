@@ -1,6 +1,11 @@
 // ─── ADD / EDIT DEVELOPMENT SITES HERE ───────────────────────────────────────
 //
-// status options: "proposed" | "planned" | "under-construction" | "completed" | "cancelled"
+// status options:
+//   "proposed"           — announced or rumored, no city filing yet
+//   "planned"            — platted, city council approved, or permits filed
+//   "under-construction" — actively being built
+//   "completed"          — open / finished
+//   "cancelled"          — officially withdrawn or abandoned
 //
 // planPdf: filename inside /public/plans/ — e.g. "sooner-mall-dicks.pdf"
 //          Leave as undefined if you don't have a plan yet.
@@ -31,6 +36,23 @@ export interface DevelopmentSite {
 }
 
 export const SITES: DevelopmentSite[] = [
+  {
+    id: "mixed-use-key-west",
+    name: "Mixed-Use Development — Key West Corner",
+    address: "Key West Ave & N Porter Ave, Norman, OK",
+    lat: 35.24914726543468,
+    lng: -97.49570089378544,
+    status: "planned",
+    description: "Mixed-use development planned for the Key West and Norman corner.",
+    articles: [
+      {
+        title: "Mixed-Use Development Planned for Key West Norman Corner",
+        url: "https://www.normanokdevelopment.com/2018/01/24/mixed-use-development-planned-for-key-west-norman-corner/",
+        date: "January 24, 2018",
+      },
+    ],
+    planPdf: undefined,
+  },
   {
     id: "7eleven-rock-creek-porter",
     name: "7-Eleven — Rock Creek & Porter",
