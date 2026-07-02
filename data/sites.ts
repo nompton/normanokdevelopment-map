@@ -37,6 +37,23 @@ export interface DevelopmentSite {
 
 export const SITES: DevelopmentSite[] = [
   {
+    id: "joann-parkway-plaza",
+    name: "Jo-Ann Fabrics — Parkway Plaza",
+    address: "Parkway Plaza, Norman, OK",
+    lat: 35.21228185789137,
+    lng: -97.48694101036048,
+    status: "completed",
+    description: "Jo-Ann Fabrics opened in Parkway Plaza but later closed.",
+    articles: [
+      {
+        title: "Jo-Ann Fabrics to Occupy Space in Parkway Plaza",
+        url: "https://www.normanokdevelopment.com/2019/03/22/joann-fabrics-to-occupy-space-in-parkway-plaza/",
+        date: "March 22, 2019",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "oncue-west-lindsey",
     name: "OnCue — West Lindsey",
     address: "W Lindsey St, Norman, OK",
