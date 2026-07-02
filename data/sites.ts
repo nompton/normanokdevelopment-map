@@ -105,6 +105,23 @@ export const SITES: DevelopmentSite[] = [
     planPdf: undefined,
   },
   {
+    id: "bob-moore-farms-ed-noble",
+    name: "Bob Moore Farms — Ed Noble Pkwy",
+    address: "Ed Noble Pkwy, Norman, OK",
+    lat: 35.21425995616582,
+    lng: -97.49170592107458,
+    status: "planned",
+    description: "Large residential project by Bob Moore Farms planned for the Ed Noble Parkway area.",
+    articles: [
+      {
+        title: "Bob Moore Farms to Bring Large Residential Project to Ed Noble Parkway Area",
+        url: "https://www.normanokdevelopment.com/2024/06/21/bob-moore-farms-to-bring-large-residential-project-to-ed-noble-parkway-area/",
+        date: "June 21, 2024",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "parking-garage-downtown",
     name: "Parking Garage Development — Downtown",
     address: "Downtown Norman, OK",
@@ -287,6 +304,11 @@ export const SITES: DevelopmentSite[] = [
         title: "Arena Proposal Submitted for UNP",
         url: "https://www.normanokdevelopment.com/2023/11/18/arena-proposal-submitted-for-unp/",
         date: "November 18, 2023",
+      },
+      {
+        title: "Norman Arena and Entertainment District to Go Before Planning Commission; August Citizen Vote Possible",
+        url: "https://www.normanokdevelopment.com/2024/06/08/norman-arena-and-entertainment-district-to-go-before-planning-commission-august-citizen-vote-possible/",
+        date: "June 8, 2024",
       },
     ],
     planPdf: undefined,
