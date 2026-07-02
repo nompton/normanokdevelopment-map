@@ -105,6 +105,23 @@ export const SITES: DevelopmentSite[] = [
     planPdf: undefined,
   },
   {
+    id: "tamashii-ramen-downtown",
+    name: "Tamashii Ramen — Downtown Norman",
+    address: "Downtown Norman, OK",
+    lat: 35.22004218479969,
+    lng: -97.44494363894724,
+    status: "completed",
+    description: "Tamashii Ramen opened a downtown Norman location.",
+    articles: [
+      {
+        title: "Tamashii Ramen Plans Downtown Norman Location",
+        url: "https://www.normanokdevelopment.com/2024/02/29/tamashii-ramen-plans-downtown-norman-location/",
+        date: "February 29, 2024",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "pf-changs-unp",
     name: "P.F. Chang's — University North Park",
     address: "University North Park, Norman, OK",
