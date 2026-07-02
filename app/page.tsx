@@ -137,7 +137,7 @@ export default function Page() {
             rel="noopener noreferrer"
             className="flex items-center gap-3 hover:opacity-85 transition-opacity"
           >
-            <img src="/nd-icon.png" alt="Norman Development" className="h-8 w-8 object-contain rounded" />
+            <img src="/icon.png" alt="Norman Development" className="h-8 w-8 object-contain rounded" />
             <div style={sans}>
               <div className="text-white font-bold text-sm leading-tight tracking-tight">Norman Development</div>
               <div className="text-white/70 text-[10px] tracking-wide uppercase">Development Map</div>

@@ -43,7 +43,7 @@ export const SITES: DevelopmentSite[] = [
     lat: 35.26230187787693,
     lng: -97.49213255492941,
     status: "completed",
-    description: "Wendy's new location in NW Norman. This is the site the South Norman Wendy's project relocated to.",
+    description: "Wendy's new location in NW Norman.",
     articles: [
       {
         title: "Wendy's Planning New NW Norman Location",
