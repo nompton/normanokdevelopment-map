@@ -519,7 +519,7 @@ export const SITES: DevelopmentSite[] = [
   },
   {
     id: "arena-unp",
-    name: "Arena — University North Park",
+    name: "Rock Creek Entertainment District",
     address: "University North Park, Norman, OK",
     lat: 35.252309698617005,
     lng: -97.48330641179393,
