@@ -105,6 +105,40 @@ export const SITES: DevelopmentSite[] = [
     planPdf: undefined,
   },
   {
+    id: "coffee-chain-location-1",
+    name: "National Coffee Chain — W Main St",
+    address: "W Main St, Norman, OK",
+    lat: 35.218840262595286,
+    lng: -97.48058571759682,
+    status: "completed",
+    description: "One of two new Norman locations added by a national coffee chain.",
+    articles: [
+      {
+        title: "National Coffee Chain Bringing 2 New Locations",
+        url: "https://www.normanokdevelopment.com/2022/01/20/national-coffee-chain-bringing-2-new-locations/",
+        date: "January 20, 2022",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
+    id: "coffee-chain-location-2",
+    name: "National Coffee Chain — E Lindsey St",
+    address: "E Lindsey St, Norman, OK",
+    lat: 35.23323588883364,
+    lng: -97.44267030155936,
+    status: "completed",
+    description: "One of two new Norman locations added by a national coffee chain.",
+    articles: [
+      {
+        title: "National Coffee Chain Bringing 2 New Locations",
+        url: "https://www.normanokdevelopment.com/2022/01/20/national-coffee-chain-bringing-2-new-locations/",
+        date: "January 20, 2022",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "starbucks-north-norman",
     name: "Starbucks — North Norman",
     address: "N Norman, OK",
