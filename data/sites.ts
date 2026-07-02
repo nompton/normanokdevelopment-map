@@ -105,6 +105,23 @@ export const SITES: DevelopmentSite[] = [
     planPdf: undefined,
   },
   {
+    id: "coffee-chain-main-street",
+    name: "National Coffee Chain — Main Street",
+    address: "W Main St, Norman, OK",
+    lat: 35.21821820484369,
+    lng: -97.45975564535121,
+    status: "completed",
+    description: "National coffee chain opened on Main Street in Norman.",
+    articles: [
+      {
+        title: "National Coffee Chain Coming to Main Street",
+        url: "https://www.normanokdevelopment.com/2020/11/05/national-coffee-chain-coming-to-main-street/",
+        date: "November 5, 2020",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "mntc-unp-tract",
     name: "MNTC Land Purchase — University North Park",
     address: "University North Park, Norman, OK",
