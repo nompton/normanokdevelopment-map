@@ -105,6 +105,23 @@ export const SITES: DevelopmentSite[] = [
     planPdf: undefined,
   },
   {
+    id: "target-south-norman",
+    name: "Target — South Norman",
+    address: "S Norman, OK",
+    lat: 35.170365659865276,
+    lng: -97.40721719366417,
+    status: "under-construction",
+    description: "Target anticipated to anchor a new South Norman development.",
+    articles: [
+      {
+        title: "Target Anticipated to Anchor South Norman Development",
+        url: "https://www.normanokdevelopment.com/2024/10/10/target-anticipated-to-anchor-south-norman-development/",
+        date: "October 10, 2024",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "bob-moore-farms-ed-noble",
     name: "Bob Moore Farms — Ed Noble Pkwy",
     address: "Ed Noble Pkwy, Norman, OK",
