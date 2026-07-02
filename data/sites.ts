@@ -105,6 +105,23 @@ export const SITES: DevelopmentSite[] = [
     planPdf: undefined,
   },
   {
+    id: "salad-chain-main-street",
+    name: "Salad Chain — Main Street Redevelopment",
+    address: "W Main St, Norman, OK",
+    lat: 35.21818517027543,
+    lng: -97.45930024686974,
+    status: "cancelled",
+    description: "Salad chain proposed to redevelop a Main Street parcel but did not move forward.",
+    articles: [
+      {
+        title: "Salad Chain to Redevelop Main Street Parcel",
+        url: "https://www.normanokdevelopment.com/2023/10/08/salad-chain-to-redevelop-main-street-parcel/",
+        date: "October 8, 2023",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "andys-frozen-custard-west-norman",
     name: "Andy's Frozen Custard — West Norman",
     address: "W Norman, OK",
