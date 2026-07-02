@@ -37,6 +37,23 @@ export interface DevelopmentSite {
 
 export const SITES: DevelopmentSite[] = [
   {
+    id: "mixed-use-campus-corner",
+    name: "Mixed-Use Development — Campus Corner",
+    address: "Campus Corner, Norman, OK",
+    lat: 35.21346127831052,
+    lng: -97.44348262547034,
+    status: "cancelled",
+    description: "Mixed-use development proposed for the Campus Corner area.",
+    articles: [
+      {
+        title: "Mixed-Use Development Proposed for Campus Corner",
+        url: "https://www.normanokdevelopment.com/2018/01/26/mixed-use-development-proposed-for-campus-corner/",
+        date: "January 26, 2018",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "oil-change-long-john-silvers",
     name: "Oil Change Shop — Former Long John Silver's",
     address: "E Lindsey St, Norman, OK",
