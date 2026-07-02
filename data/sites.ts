@@ -37,6 +37,23 @@ export interface DevelopmentSite {
 
 export const SITES: DevelopmentSite[] = [
   {
+    id: "hotel-unp",
+    name: "Hotel — University North Park",
+    address: "University North Park, Norman, OK",
+    lat: 35.2463579188148,
+    lng: -97.48291447157786,
+    status: "planned",
+    description: "New hotel chain planned for University North Park.",
+    articles: [
+      {
+        title: "UNP to Gain New Hotel Chain",
+        url: "https://www.normanokdevelopment.com/2018/02/22/unp-to-gain-new-hotel-chain/",
+        date: "February 22, 2018",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "carmax-unp",
     name: "CarMax — University North Park",
     address: "University North Park, Norman, OK",
