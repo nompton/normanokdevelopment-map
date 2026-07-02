@@ -37,6 +37,23 @@ export interface DevelopmentSite {
 
 export const SITES: DevelopmentSite[] = [
   {
+    id: "wendys-nw-norman",
+    name: "Wendy's — NW Norman",
+    address: "NW Norman, OK",
+    lat: 35.26230187787693,
+    lng: -97.49213255492941,
+    status: "completed",
+    description: "Wendy's new location in NW Norman. This is the site the South Norman Wendy's project relocated to.",
+    articles: [
+      {
+        title: "Wendy's Planning New NW Norman Location",
+        url: "https://www.normanokdevelopment.com/2019/07/14/wendys-planning-new-nw-norman-location/",
+        date: "July 14, 2019",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "joann-parkway-plaza",
     name: "Jo-Ann Fabrics — Parkway Plaza",
     address: "Parkway Plaza, Norman, OK",
