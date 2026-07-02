@@ -105,6 +105,23 @@ export const SITES: DevelopmentSite[] = [
     planPdf: undefined,
   },
   {
+    id: "arena-unp",
+    name: "Arena — University North Park",
+    address: "University North Park, Norman, OK",
+    lat: 35.252309698617005,
+    lng: -97.48330641179393,
+    status: "under-construction",
+    description: "Arena proposal submitted for University North Park, now under construction.",
+    articles: [
+      {
+        title: "Arena Proposal Submitted for UNP",
+        url: "https://www.normanokdevelopment.com/2023/11/18/arena-proposal-submitted-for-unp/",
+        date: "November 18, 2023",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "tea-franchise-west-lindsey",
     name: "Local Tea Franchise — West Lindsey",
     address: "W Lindsey St, Norman, OK",
