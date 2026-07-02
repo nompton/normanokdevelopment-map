@@ -105,6 +105,23 @@ export const SITES: DevelopmentSite[] = [
     planPdf: undefined,
   },
   {
+    id: "whataburger-south-norman",
+    name: "Whataburger — Second Norman Location",
+    address: "S Norman, OK",
+    lat: 35.18579394827776,
+    lng: -97.42035299968362,
+    status: "completed",
+    description: "Whataburger opened a second Norman location in South Norman.",
+    articles: [
+      {
+        title: "Whataburger Plans Second Norman Location",
+        url: "https://www.normanokdevelopment.com/2024/01/06/whataburger-plans-second-norman-location/",
+        date: "January 6, 2024",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "andrews-park-master-plan",
     name: "Andrews Park Master Plan — Downtown",
     address: "Andrews Park, Norman, OK",
