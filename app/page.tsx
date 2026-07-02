@@ -195,7 +195,6 @@ export default function Page() {
   // ── HELPERS ───────────────────────────────────────────────────────────────
   function flyTo(site: DevelopmentSite) {
     setSelected(site);
-    setListOpen(false);
     mapInstanceRef.current?.flyTo([site.lat, site.lng], 17, { duration: 0.8 });
   }
 
@@ -264,85 +263,30 @@ export default function Page() {
 
         {/* Desktop sidebar */}
         {listOpen && (
-          <aside className="hidden md:flex w-72 shrink-0 border-r border-black/10 bg-white flex-col overflow-hidden z-40">
-            <SiteList
-              filteredSites={filteredSites}
-              allSites={SITES}
-              activeFilters={activeFilters}
-              search={search}
-              selected={selected}
-              onSearch={setSearch}
-              onToggleFilter={toggleFilter}
-              onToggleAll={() => setActiveFilters(prev => prev.size === ALL_STATUSES.length ? new Set() : new Set(ALL_STATUSES))}
-              onSelect={flyTo}
-            />
-          </aside>
-        )}
-
-        {/* MAP */}
-        <div className="relative flex-1">
-          <div ref={mapRef} className="w-full h-full" />
-
-          {/* Site detail panel — bottom sheet on mobile, floating card on desktop */}
-          {selected && (
-            <div className="absolute bottom-16 md:bottom-4 left-0 right-0 mx-2 md:mx-0 md:left-4 md:right-auto md:w-96 bg-white border border-black/10 rounded-2xl shadow-xl overflow-hidden z-[1000]" style={sans}>
-              <div className="h-1 w-full" style={{ background: BRAND }} />
-              <div className="flex items-start justify-between gap-3 px-4 pt-4 pb-2">
-                <div className="min-w-0">
-                  <StatusBadge status={selected.status} />
-                  <h2 className="mt-1.5 text-sm font-bold text-neutral-900 leading-snug">{selected.name}</h2>
-                  <p className="mt-0.5 text-xs text-black/50 truncate">{selected.address}</p>
+          <aside className="hidden md:flex w-80 shrink-0 border-r border-black/10 bg-white flex-col overflow-hidden z-40">
+            {selected ? (
+              <>
+                <SiteDetail
+                  site={selected}
+                  onClose={() => setSelected(null)}
+                  onPdf={() => setPdfOpen(true)}
+                  showBack
+                />
+                <div className="border-t border-black/10 flex-1 overflow-hidden flex flex-col">
+                  <SiteList
+                    filteredSites={filteredSites}
+                    allSites={SITES}
+                    activeFilters={activeFilters}
+                    search={search}
+                    selected={selected}
+                    onSearch={setSearch}
+                    onToggleFilter={toggleFilter}
+                    onToggleAll={() => setActiveFilters(prev => prev.size === ALL_STATUSES.length ? new Set() : new Set(ALL_STATUSES))}
+                    onSelect={flyTo}
+                  />
                 </div>
-                <button onClick={() => setSelected(null)}
-                  className="shrink-0 rounded-full w-7 h-7 flex items-center justify-center text-black/40 hover:bg-black/10 transition-colors text-sm">
-                  ✕
-                </button>
-              </div>
-              <div className="px-4 pb-2">
-                <p className="text-xs text-neutral-700 leading-5">{selected.description}</p>
-              </div>
-              {selected.articles.length > 0 && (
-                <div className="px-4 pb-3">
-                  <div className="text-[10px] font-semibold uppercase tracking-widest text-black/40 mb-1.5">Coverage</div>
-                  <div className="space-y-1.5">
-                    {selected.articles.map((a) => (
-                      <a key={a.url} href={a.url} target="_blank" rel="noopener noreferrer" className="flex items-start gap-1.5 group">
-                        <span className="text-xs shrink-0 font-bold mt-0.5" style={{ color: BRAND }}>↗</span>
-                        <div>
-                          <div className="text-xs group-hover:underline leading-snug" style={{ color: BRAND }}>{a.title}</div>
-                          {a.date && <div className="text-[10px] text-black/40 mt-0.5">{a.date}</div>}
-                        </div>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {selected.planPdf ? (
-                <div className="px-4 pb-4">
-                  <button onClick={() => setPdfOpen(true)}
-                    className="w-full rounded-xl border px-3 py-2 text-xs font-medium transition-colors text-left flex items-center gap-2"
-                    style={{ borderColor: BRAND, color: BRAND }}>
-                    <span>📄</span> View site plan
-                  </button>
-                </div>
-              ) : (
-                <div className="px-4 pb-4">
-                  <div className="rounded-xl border border-black/10 bg-black/[0.02] px-3 py-2 text-xs text-black/40">No site plan on file yet</div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Mobile list bottom sheet */}
-        {listOpen && (
-          <div className="md:hidden absolute inset-0 z-30 flex flex-col justify-end">
-            <div className="absolute inset-0 bg-black/30" onClick={() => setListOpen(false)} />
-            <div className="relative bg-white rounded-t-2xl flex flex-col overflow-hidden" style={{ maxHeight: "55vh" }}>
-              <div className="flex items-center justify-between px-4 py-3 border-b border-black/10 shrink-0">
-                <span className="text-sm font-semibold">Development Sites</span>
-                <button onClick={() => setListOpen(false)} className="text-black/40 text-lg w-8 h-8 flex items-center justify-center">✕</button>
-              </div>
+              </>
+            ) : (
               <SiteList
                 filteredSites={filteredSites}
                 allSites={SITES}
@@ -354,6 +298,56 @@ export default function Page() {
                 onToggleAll={() => setActiveFilters(prev => prev.size === ALL_STATUSES.length ? new Set() : new Set(ALL_STATUSES))}
                 onSelect={flyTo}
               />
+            )}
+          </aside>
+        )}
+
+        {/* MAP */}
+        <div className="relative flex-1">
+          <div ref={mapRef} className="w-full h-full" />
+        </div>
+
+        {/* Mobile bottom sheet — list or detail */}
+        {listOpen && (
+          <div className="md:hidden absolute inset-0 z-30 flex flex-col justify-end">
+            <div className="absolute inset-0 bg-black/30" onClick={() => setListOpen(false)} />
+            <div className="relative bg-white rounded-t-2xl flex flex-col overflow-hidden" style={{ maxHeight: "55vh" }}>
+              {selected ? (
+                <>
+                  <div className="flex items-center gap-2 px-4 py-3 border-b border-black/10 shrink-0">
+                    <button onClick={() => setSelected(null)}
+                      className="flex items-center gap-1 text-xs font-medium hover:opacity-70 transition-opacity"
+                      style={{ color: BRAND }}>
+                      ← Back
+                    </button>
+                  </div>
+                  <div className="flex-1 overflow-y-auto">
+                    <SiteDetail
+                      site={selected}
+                      onClose={() => setSelected(null)}
+                      onPdf={() => setPdfOpen(true)}
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-black/10 shrink-0">
+                    <span className="text-sm font-semibold">Development Sites</span>
+                    <button onClick={() => setListOpen(false)} className="text-black/40 text-lg w-8 h-8 flex items-center justify-center">✕</button>
+                  </div>
+                  <SiteList
+                    filteredSites={filteredSites}
+                    allSites={SITES}
+                    activeFilters={activeFilters}
+                    search={search}
+                    selected={selected}
+                    onSearch={setSearch}
+                    onToggleFilter={toggleFilter}
+                    onToggleAll={() => setActiveFilters(prev => prev.size === ALL_STATUSES.length ? new Set() : new Set(ALL_STATUSES))}
+                    onSelect={flyTo}
+                  />
+                </>
+              )}
             </div>
           </div>
         )}
@@ -361,7 +355,7 @@ export default function Page() {
 
       {/* ── MOBILE BOTTOM BAR ── */}
       <div className="md:hidden shrink-0 border-t border-black/10 bg-white flex items-center justify-around px-4 py-2 z-40">
-        <button onClick={() => { setListOpen(!listOpen); setSelected(null); }}
+        <button onClick={() => setListOpen(!listOpen)}
           className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg transition-colors"
           style={{ color: listOpen ? BRAND : undefined }}>
           <span className="text-lg">☰</span>
@@ -399,6 +393,64 @@ export default function Page() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ── SITE DETAIL COMPONENT ─────────────────────────────────────────────────────
+function SiteDetail({ site, onClose, onPdf, showBack }: {
+  site: DevelopmentSite;
+  onClose: () => void;
+  onPdf: () => void;
+  showBack?: boolean;
+}) {
+  const sans = { fontFamily: "Arial, Helvetica, sans-serif" };
+  return (
+    <div className="flex flex-col" style={sans}>
+      <div className="h-1 w-full shrink-0" style={{ background: BRAND }} />
+      <div className="flex items-start justify-between gap-3 px-4 pt-4 pb-2">
+        <div className="min-w-0">
+          <StatusBadge status={site.status} />
+          <h2 className="mt-1.5 text-sm font-bold text-neutral-900 leading-snug">{site.name}</h2>
+          <p className="mt-0.5 text-xs text-black/50">{site.address}</p>
+        </div>
+        {!showBack && (
+          <button onClick={onClose}
+            className="shrink-0 rounded-full w-7 h-7 flex items-center justify-center text-black/40 hover:bg-black/10 transition-colors text-sm">
+            ✕
+          </button>
+        )}
+      </div>
+      <div className="px-4 pb-2">
+        <p className="text-xs text-neutral-700 leading-5">{site.description}</p>
+      </div>
+      {site.articles.length > 0 && (
+        <div className="px-4 pb-3">
+          <div className="text-[10px] font-semibold uppercase tracking-widest text-black/40 mb-1.5">Coverage</div>
+          <div className="space-y-1.5">
+            {site.articles.map((a) => (
+              <a key={a.url} href={a.url} target="_blank" rel="noopener noreferrer" className="flex items-start gap-1.5 group">
+                <span className="text-xs shrink-0 font-bold mt-0.5" style={{ color: BRAND }}>↗</span>
+                <div>
+                  <div className="text-xs group-hover:underline leading-snug" style={{ color: BRAND }}>{a.title}</div>
+                  {a.date && <div className="text-[10px] text-black/40 mt-0.5">{a.date}</div>}
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+      <div className="px-4 pb-4">
+        {site.planPdf ? (
+          <button onClick={onPdf}
+            className="w-full rounded-xl border px-3 py-2 text-xs font-medium transition-colors text-left flex items-center gap-2"
+            style={{ borderColor: BRAND, color: BRAND }}>
+            <span>📄</span> View site plan
+          </button>
+        ) : (
+          <div className="rounded-xl border border-black/10 bg-black/[0.02] px-3 py-2 text-xs text-black/40">No site plan on file yet</div>
+        )}
+      </div>
     </div>
   );
 }
