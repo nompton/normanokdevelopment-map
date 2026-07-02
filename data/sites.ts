@@ -37,6 +37,23 @@ export interface DevelopmentSite {
 
 export const SITES: DevelopmentSite[] = [
   {
+    id: "oncue-west-lindsey",
+    name: "OnCue — West Lindsey",
+    address: "W Lindsey St, Norman, OK",
+    lat: 35.20474262973354,
+    lng: -97.47760817016086,
+    status: "completed",
+    description: "OnCue purchased a prominent corner on West Lindsey Street for a new location.",
+    articles: [
+      {
+        title: "OnCue Buys Prominent West Lindsey Corner",
+        url: "https://www.normanokdevelopment.com/2019/01/29/oncue-buys-prominent-west-lindsey-corner/",
+        date: "January 29, 2019",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "panda-express-south-norman",
     name: "Panda Express — South Norman",
     address: "S Norman, OK",
