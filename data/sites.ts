@@ -105,6 +105,23 @@ export const SITES: DevelopmentSite[] = [
     planPdf: undefined,
   },
   {
+    id: "starbucks-north-norman",
+    name: "Starbucks — North Norman",
+    address: "N Norman, OK",
+    lat: 35.26396914949298,
+    lng: -97.47563200960602,
+    status: "completed",
+    description: "Starbucks added a North Norman location.",
+    articles: [
+      {
+        title: "Starbucks Adding North Norman Location",
+        url: "https://www.normanokdevelopment.com/2021/07/09/starbucks-adding-north-norman-location/",
+        date: "July 9, 2021",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "taco-chain-lindsey",
     name: "Dallas Taco Chain — Lindsey Street",
     address: "W Lindsey St, Norman, OK",
