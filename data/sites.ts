@@ -1143,8 +1143,8 @@ export const SITES: DevelopmentSite[] = [
     id: "dicks-sooner-mall",
     name: "Dick's House of Sport — Sooner Mall",
     address: "3301 W Main St, Norman, OK 73072",
-    lat: 35.2103,
-    lng: -97.4785,
+    lat: 35.220095208501256,
+    lng: -97.48897028603979,
     status: "proposed",
     description:
       "Dick's House of Sport is eyeing the former Sears anchor space at Sooner Mall, which has sat vacant since mid-2019. The format is a large-format experiential sports retail concept.",
