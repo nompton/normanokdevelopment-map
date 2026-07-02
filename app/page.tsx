@@ -4,12 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import { SITES, DevelopmentSite, SiteStatus } from "../data/sites";
 
 const STATUS_CONFIG: Record<SiteStatus, { label: string; color: string; dot: string }> = {
-  proposed:             { label: "Proposed",           color: "bg-amber-100 text-amber-800 border-amber-200",   dot: "#f59e0b" },
-  planned:              { label: "Planned",             color: "bg-blue-100 text-blue-800 border-blue-200",     dot: "#3b82f6" },
-  "under-construction": { label: "Under Construction",  color: "bg-orange-100 text-orange-800 border-orange-200", dot: "#f97316" },
-  completed:            { label: "Completed",           color: "bg-green-100 text-green-800 border-green-200",  dot: "#22c55e" },
+  proposed:             { label: "Proposed",           color: "bg-amber-100 text-amber-800 border-amber-200",        dot: "#f59e0b" },
+  planned:              { label: "Planned",             color: "bg-blue-100 text-blue-800 border-blue-200",          dot: "#3b82f6" },
+  "under-construction": { label: "Under Construction",  color: "bg-orange-100 text-orange-800 border-orange-200",    dot: "#f97316" },
+  completed:            { label: "Completed",           color: "bg-green-100 text-green-800 border-green-200",       dot: "#22c55e" },
   cancelled:            { label: "Cancelled",           color: "bg-neutral-100 text-neutral-500 border-neutral-200", dot: "#9ca3af" },
 };
+
+const ALL_STATUSES = Object.keys(STATUS_CONFIG) as SiteStatus[];
 
 function StatusBadge({ status }: { status: SiteStatus }) {
   const cfg = STATUS_CONFIG[status];
@@ -28,17 +30,30 @@ export default function Page() {
   const [selected, setSelected] = useState<DevelopmentSite | null>(null);
   const [pdfOpen, setPdfOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const selectedRef = useRef<DevelopmentSite | null>(null);
-  selectedRef.current = selected;
+  const [activeFilters, setActiveFilters] = useState<Set<SiteStatus>>(new Set(ALL_STATUSES));
+  const [search, setSearch] = useState("");
+
+  // Show/hide markers when filters change
+  useEffect(() => {
+    if (!mapInstanceRef.current) return;
+    SITES.forEach((site) => {
+      const marker = markersRef.current[site.id];
+      if (!marker) return;
+      if (activeFilters.has(site.status)) {
+        marker.addTo(mapInstanceRef.current);
+      } else {
+        marker.remove();
+      }
+    });
+    // Deselect if filtered out
+    if (selected && !activeFilters.has(selected.status)) setSelected(null);
+  }, [activeFilters, selected]);
 
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
 
     function initMap(L: any) {
-      const map = L.map(mapRef.current!, { scrollWheelZoom: true }).setView(
-        [35.2226, -97.4395],
-        13
-      );
+      const map = L.map(mapRef.current!, { scrollWheelZoom: true }).setView([35.2226, -97.4395], 13);
       mapInstanceRef.current = map;
 
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -54,12 +69,8 @@ export default function Page() {
           iconSize: [14, 14],
           iconAnchor: [7, 7],
         });
-
         const marker = L.marker([site.lat, site.lng], { icon }).addTo(map);
-        marker.on("click", () => {
-          setSelected(site);
-          setSidebarOpen(true);
-        });
+        marker.on("click", () => { setSelected(site); setSidebarOpen(true); });
         markersRef.current[site.id] = marker;
       });
     }
@@ -81,10 +92,7 @@ export default function Page() {
       document.head.appendChild(script);
     }
 
-    return () => {
-      mapInstanceRef.current?.remove();
-      mapInstanceRef.current = null;
-    };
+    return () => { mapInstanceRef.current?.remove(); mapInstanceRef.current = null; };
   }, []);
 
   function flyTo(site: DevelopmentSite) {
@@ -92,6 +100,28 @@ export default function Page() {
     setSidebarOpen(true);
     mapInstanceRef.current?.flyTo([site.lat, site.lng], 16, { duration: 0.8 });
   }
+
+  function toggleFilter(status: SiteStatus) {
+    setActiveFilters((prev) => {
+      const next = new Set(prev);
+      if (next.has(status)) { next.delete(status); } else { next.add(status); }
+      return next;
+    });
+  }
+
+  function toggleAll() {
+    setActiveFilters((prev) =>
+      prev.size === ALL_STATUSES.length ? new Set() : new Set(ALL_STATUSES)
+    );
+  }
+
+  const filteredSites = SITES.filter(
+    (s) =>
+      activeFilters.has(s.status) &&
+      (search === "" ||
+        s.name.toLowerCase().includes(search.toLowerCase()) ||
+        s.address.toLowerCase().includes(search.toLowerCase()))
+  );
 
   const sans = { fontFamily: "Arial, Helvetica, sans-serif" };
 
@@ -112,22 +142,12 @@ export default function Page() {
           <span className="text-black/20 text-sm">|</span>
           <span className="text-sm font-medium text-neutral-600">Development Map</span>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="hidden sm:flex items-center gap-2 text-xs text-black/50">
-            {(Object.entries(STATUS_CONFIG) as [SiteStatus, typeof STATUS_CONFIG[SiteStatus]][]).map(([key, cfg]) => (
-              <span key={key} className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full inline-block" style={{ background: cfg.dot }} />
-                {cfg.label}
-              </span>
-            ))}
-          </div>
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="rounded-lg border border-black/15 px-3 py-1.5 text-xs font-medium hover:bg-black/5 transition-colors"
-          >
-            {sidebarOpen ? "Hide list" : "Show list"}
-          </button>
-        </div>
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="rounded-lg border border-black/15 px-3 py-1.5 text-xs font-medium hover:bg-black/5 transition-colors"
+        >
+          {sidebarOpen ? "Hide list" : "Show list"}
+        </button>
       </header>
 
       {/* BODY */}
@@ -135,13 +155,62 @@ export default function Page() {
         {/* SIDEBAR */}
         {sidebarOpen && (
           <aside className="w-72 shrink-0 border-r border-black/10 bg-white flex flex-col overflow-hidden">
-            <div className="px-4 py-3 border-b border-black/10 flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-widest text-black/40">
-                {SITES.length} sites
+
+            {/* SEARCH */}
+            <div className="px-3 pt-3 pb-2 border-b border-black/10">
+              <input
+                type="text"
+                placeholder="Search sites…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full rounded-lg border border-black/15 px-3 py-2 text-xs focus:outline-none focus:border-black/30 transition-colors"
+              />
+            </div>
+
+            {/* FILTERS */}
+            <div className="px-3 py-2.5 border-b border-black/10 space-y-1.5">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-black/40">Filter by status</span>
+                <button
+                  onClick={toggleAll}
+                  className="text-[10px] text-black/40 hover:text-black transition-colors"
+                >
+                  {activeFilters.size === ALL_STATUSES.length ? "clear all" : "select all"}
+                </button>
+              </div>
+              {ALL_STATUSES.map((status) => {
+                const cfg = STATUS_CONFIG[status];
+                const count = SITES.filter((s) => s.status === status).length;
+                const active = activeFilters.has(status);
+                return (
+                  <button
+                    key={status}
+                    onClick={() => toggleFilter(status)}
+                    className={`w-full flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs transition-all border ${
+                      active ? "border-black/15 bg-white" : "border-transparent bg-black/[0.02] opacity-40"
+                    }`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full shrink-0" style={{ background: cfg.dot }} />
+                      <span className="font-medium">{cfg.label}</span>
+                    </span>
+                    <span className="text-black/40">{count}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* SITE LIST */}
+            <div className="px-3 py-2 border-b border-black/10">
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-black/40">
+                {filteredSites.length} of {SITES.length} sites
               </span>
             </div>
             <div className="flex-1 overflow-y-auto">
-              {SITES.map((site) => {
+              {filteredSites.length === 0 && (
+                <div className="px-4 py-8 text-center text-xs text-black/40">No sites match your filters.</div>
+              )}
+              {filteredSites.map((site) => {
                 const cfg = STATUS_CONFIG[site.status];
                 const isActive = selected?.id === site.id;
                 return (
@@ -215,7 +284,7 @@ export default function Page() {
                 </div>
               )}
 
-              {selected.planPdf && (
+              {selected.planPdf ? (
                 <div className="px-5 pb-5">
                   <button
                     onClick={() => setPdfOpen(true)}
@@ -225,8 +294,7 @@ export default function Page() {
                     View site plan
                   </button>
                 </div>
-              )}
-              {!selected.planPdf && (
+              ) : (
                 <div className="px-5 pb-5">
                   <div className="rounded-xl border border-black/10 bg-black/[0.02] px-4 py-2.5 text-xs text-black/40">
                     No site plan on file yet
