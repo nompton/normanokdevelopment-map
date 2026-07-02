@@ -37,6 +37,23 @@ export interface DevelopmentSite {
 
 export const SITES: DevelopmentSite[] = [
   {
+    id: "oil-change-long-john-silvers",
+    name: "Oil Change Shop — Former Long John Silver's",
+    address: "E Lindsey St, Norman, OK",
+    lat: 35.21671550146959,
+    lng: -97.4241177552962,
+    status: "completed",
+    description: "Oil change shop built on the site of the former Long John Silver's location.",
+    articles: [
+      {
+        title: "Oil Change Shop to Take Site of Former Long John Silver's",
+        url: "https://www.normanokdevelopment.com/2018/01/25/oil-change-shop-to-take-site-of-former-long-john-silvers/",
+        date: "January 25, 2018",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "office-healthplex",
     name: "Office Development — Healthplex Campus",
     address: "Healthplex Campus, Norman, OK",
