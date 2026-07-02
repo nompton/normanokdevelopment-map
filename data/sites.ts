@@ -105,6 +105,23 @@ export const SITES: DevelopmentSite[] = [
     planPdf: undefined,
   },
   {
+    id: "starbucks-lindsey-street",
+    name: "Starbucks — Lindsey Street",
+    address: "W Lindsey St, Norman, OK",
+    lat: 35.20356105685391,
+    lng: -97.4592847092809,
+    status: "completed",
+    description: "Starbucks joined the tenant mix on Lindsey Street in Norman.",
+    articles: [
+      {
+        title: "Starbucks Joining Tenant Mix on Lindsey Street",
+        url: "https://www.normanokdevelopment.com/2022/04/11/starbucks-joining-tenant-mix-on-lindsey-street/",
+        date: "April 11, 2022",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "coffee-chain-location-1",
     name: "National Coffee Chain — W Main St",
     address: "W Main St, Norman, OK",
