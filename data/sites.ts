@@ -32,6 +32,23 @@ export interface DevelopmentSite {
 
 export const SITES: DevelopmentSite[] = [
   {
+    id: "chickfila-east-norman",
+    name: "Chick-fil-A — East Norman",
+    address: "East Norman, OK",
+    lat: 35.21986422938324,
+    lng: -97.42419563945145,
+    status: "completed",
+    description: "Chick-fil-A location in East Norman.",
+    articles: [
+      {
+        title: "Chick-fil-A to Open New East Norman Location",
+        url: "https://www.normanokdevelopment.com/2018/01/23/chick-fil-a-to-open-new-east-norman-location/",
+        date: "January 23, 2018",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "oncue-south-norman",
     name: "OnCue — South Norman",
     address: "South Norman, OK",
