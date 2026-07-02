@@ -1161,15 +1161,20 @@ export const SITES: DevelopmentSite[] = [
     id: "perfect-swing-hwy9",
     name: "Former Perfect Swing — Highway 9",
     address: "Highway 9, Norman, OK",
-    lat: 35.2079,
-    lng: -97.3916,
+    lat: 35.18495186074105,
+    lng: -97.41151767799238,
     status: "planned",
     description:
-      "The long-vacant Perfect Swing amusement property (32+ acres) sold for $5.8M to Highway 9 Raw Land LLC, an entity affiliated with developer Hunter Miller.",
+      "The long-vacant Perfect Swing amusement property (32+ acres) sold for $5.8M to Highway 9 Raw Land LLC, an entity affiliated with developer Hunter Miller. Land is now being cleared.",
     articles: [
       {
         title: "Long-vacant Perfect Swing property sells for $5.8M",
         url: "https://normanokdevelopment.com/long-vacant-perfect-swing-property-sells-for-5-8m/",
+        date: "February 19, 2026",
+      },
+      {
+        title: "Long-vacant Perfect Swing property sells for $5.8M",
+        url: "https://www.normanokdevelopment.com/2026/02/19/long-vacant-perfect-swing-property-sells-for-5-8m/",
         date: "February 19, 2026",
       },
     ],
@@ -1178,16 +1183,16 @@ export const SITES: DevelopmentSite[] = [
   {
     id: "chickfila-university-north-park",
     name: "Chick-fil-A — University North Park",
-    address: "Rock Creek Rd & 24th Ave NW, Norman, OK",
-    lat: 35.2568,
-    lng: -97.4785,
+    address: "University North Park, Norman, OK",
+    lat: 35.247138567836345,
+    lng: -97.47966134944508,
     status: "planned",
     description:
-      "Chick-fil-A filed a $4.5M permit for a sixth Norman location at the southwest corner of Rock Creek Road and 24th Avenue NW in University North Park.",
+      "Chick-fil-A filed a $4.5M permit for a sixth Norman location at University North Park.",
     articles: [
       {
-        title: "Chick-fil-A plans sixth Norman location in University North Park",
-        url: "https://normanokdevelopment.com/chick-fil-a-plans-sixth-norman-location-in-university-north-park/",
+        title: "Chick-fil-A Plans Sixth Norman Location in University North Park",
+        url: "https://www.normanokdevelopment.com/2026/01/30/chick-fil-a-plans-sixth-norman-location-in-university-north-park/",
         date: "January 30, 2026",
       },
     ],
