@@ -32,6 +32,23 @@ export interface DevelopmentSite {
 
 export const SITES: DevelopmentSite[] = [
   {
+    id: "oncue-south-norman",
+    name: "OnCue — South Norman",
+    address: "South Norman, OK",
+    lat: 35.18445540704393,
+    lng: -97.4198536687635,
+    status: "completed",
+    description: "OnCue convenience store and fuel station in South Norman.",
+    articles: [
+      {
+        title: "OnCue Coming to South Norman",
+        url: "https://www.normanokdevelopment.com/2018/01/22/oncue-coming-to-south-norman/",
+        date: "January 22, 2018",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "starbucks-classen",
     name: "Starbucks — Classen Boulevard",
     address: "Classen Blvd, Norman, OK",
