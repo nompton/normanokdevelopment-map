@@ -105,6 +105,23 @@ export const SITES: DevelopmentSite[] = [
     planPdf: undefined,
   },
   {
+    id: "student-housing-ou-motel",
+    name: "Student Housing — Former OU Motel Site",
+    address: "E Lindsey St, Norman, OK",
+    lat: 35.19473606750907,
+    lng: -97.42594382970297,
+    status: "cancelled",
+    description: "Student housing development proposed to replace the infamous OU motel, but did not move forward.",
+    articles: [
+      {
+        title: "Student Housing Development to Replace Infamous OU Motel",
+        url: "https://www.normanokdevelopment.com/2023/01/24/student-housing-development-to-replace-infamous-ou-motel/",
+        date: "January 24, 2023",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "starbucks-lindsey-street",
     name: "Starbucks — Lindsey Street",
     address: "W Lindsey St, Norman, OK",
