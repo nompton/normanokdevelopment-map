@@ -105,6 +105,40 @@ export const SITES: DevelopmentSite[] = [
     planPdf: undefined,
   },
   {
+    id: "dunkin-south-norman",
+    name: "Dunkin' — South Norman",
+    address: "S Norman, OK",
+    lat: 35.17934493038756,
+    lng: -97.41480999381615,
+    status: "completed",
+    description: "Dunkin' opened in South Norman alongside Popeyes.",
+    articles: [
+      {
+        title: "Dunkin', Popeyes Coming to South Norman",
+        url: "https://www.normanokdevelopment.com/2023/06/24/239/",
+        date: "June 24, 2023",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
+    id: "popeyes-south-norman",
+    name: "Popeyes — South Norman",
+    address: "S Norman, OK",
+    lat: 35.179529239585044,
+    lng: -97.41492811537952,
+    status: "completed",
+    description: "Popeyes opened in South Norman alongside Dunkin'.",
+    articles: [
+      {
+        title: "Dunkin', Popeyes Coming to South Norman",
+        url: "https://www.normanokdevelopment.com/2023/06/24/239/",
+        date: "June 24, 2023",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "skechers-parkway-plaza",
     name: "Skechers — Parkway Plaza",
     address: "Parkway Plaza, Norman, OK",
