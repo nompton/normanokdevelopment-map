@@ -105,6 +105,23 @@ export const SITES: DevelopmentSite[] = [
     planPdf: undefined,
   },
   {
+    id: "shake-shack-unp",
+    name: "Shake Shack — University North Park",
+    address: "University North Park, Norman, OK",
+    lat: 35.247242364299,
+    lng: -97.47850372959384,
+    status: "under-construction",
+    description: "Shake Shack plans a Norman location at University North Park.",
+    articles: [
+      {
+        title: "Shake Shack Plans Norman Location in UNP",
+        url: "https://www.normanokdevelopment.com/2025/08/04/shake-shack-plans-norman-location-in-unp/",
+        date: "August 4, 2025",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "1300-w-lindsey",
     name: "1300 W Lindsey — Redevelopment",
     address: "1300 W Lindsey St, Norman, OK",
