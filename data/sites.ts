@@ -37,6 +37,23 @@ export interface DevelopmentSite {
 
 export const SITES: DevelopmentSite[] = [
   {
+    id: "carmax-unp",
+    name: "CarMax — University North Park",
+    address: "University North Park, Norman, OK",
+    lat: 35.24697329569169,
+    lng: -97.48410123633055,
+    status: "completed",
+    description: "CarMax auto dealership joining the retail corridor at University North Park.",
+    articles: [
+      {
+        title: "CarMax to Join Retailers in UNP",
+        url: "https://www.normanokdevelopment.com/2018/01/29/carmax-to-join-retailers-in-unp/",
+        date: "January 29, 2018",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "mixed-use-campus-corner",
     name: "Mixed-Use Development — Campus Corner",
     address: "Campus Corner, Norman, OK",
