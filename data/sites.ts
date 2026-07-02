@@ -229,6 +229,17 @@ export const SITES: DevelopmentSite[] = [
     planPdf: undefined,
   },
   {
+    id: "former-hobby-lobby-mardel",
+    name: "Former Hobby Lobby & Mardel — Vacant",
+    address: "W Main St, Norman, OK",
+    lat: 35.220519030180256,
+    lng: -97.47769192587134,
+    status: "proposed",
+    description: "Hobby Lobby and Mardel vacated this building when they relocated to Legacy Village at UNP. The site is currently vacant with no development proposed yet.",
+    articles: [],
+    planPdf: undefined,
+  },
+  {
     id: "sooner-legends-hotel-site",
     name: "Former Sooner Legends Hotel — Vacant Site",
     address: "W Main St, Norman, OK",
