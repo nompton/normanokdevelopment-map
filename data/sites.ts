@@ -105,6 +105,23 @@ export const SITES: DevelopmentSite[] = [
     planPdf: undefined,
   },
   {
+    id: "planet-fitness-golds-gym",
+    name: "Planet Fitness — Former Gold's Gym",
+    address: "E Lindsey St, Norman, OK",
+    lat: 35.217732234649375,
+    lng: -97.4256758065951,
+    status: "completed",
+    description: "Planet Fitness took over the former Gold's Gym location in Norman.",
+    articles: [
+      {
+        title: "Planet Fitness to Take Over Norman Gold's Gym",
+        url: "https://www.normanokdevelopment.com/2020/03/11/planet-fitness-to-take-over-norman-golds-gym/",
+        date: "March 11, 2020",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "wendys-south-norman-built",
     name: "Wendy's — South Norman",
     address: "S Norman, OK",
