@@ -3,11 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import { SITES, DevelopmentSite, SiteStatus } from "../data/sites";
 
+const BRAND = "#3a8a6e";
+
 const STATUS_CONFIG: Record<SiteStatus, { label: string; color: string; dot: string; tip: string }> = {
-  proposed:             { label: "Proposed",           color: "bg-amber-100 text-amber-800 border-amber-200",        dot: "#f59e0b", tip: "Announced or rumored — no city filing yet" },
-  planned:              { label: "Planned",             color: "bg-blue-100 text-blue-800 border-blue-200",          dot: "#3b82f6", tip: "Platted, city council approved, or permits filed" },
-  "under-construction": { label: "Under Construction",  color: "bg-orange-100 text-orange-800 border-orange-200",    dot: "#f97316", tip: "Actively being built" },
-  completed:            { label: "Completed",           color: "bg-green-100 text-green-800 border-green-200",       dot: "#22c55e", tip: "Open / finished" },
+  proposed:             { label: "Proposed",           color: "bg-amber-50 text-amber-800 border-amber-200",        dot: "#f59e0b", tip: "Announced or rumored — no city filing yet" },
+  planned:              { label: "Planned",             color: "bg-blue-50 text-blue-800 border-blue-200",          dot: "#3b82f6", tip: "Platted, city council approved, or permits filed" },
+  "under-construction": { label: "Under Construction",  color: "bg-orange-50 text-orange-800 border-orange-200",    dot: "#f97316", tip: "Actively being built" },
+  completed:            { label: "Completed",           color: "bg-emerald-50 text-emerald-800 border-emerald-200", dot: "#3a8a6e", tip: "Open / finished" },
   cancelled:            { label: "Cancelled",           color: "bg-neutral-100 text-neutral-500 border-neutral-200", dot: "#9ca3af", tip: "Officially withdrawn or abandoned" },
 };
 
@@ -33,7 +35,6 @@ export default function Page() {
   const [activeFilters, setActiveFilters] = useState<Set<SiteStatus>>(new Set(ALL_STATUSES));
   const [search, setSearch] = useState("");
 
-  // Show/hide markers when filters change
   useEffect(() => {
     if (!mapInstanceRef.current) return;
     SITES.forEach((site) => {
@@ -45,7 +46,6 @@ export default function Page() {
         marker.remove();
       }
     });
-    // Deselect if filtered out
     if (selected && !activeFilters.has(selected.status)) setSelected(null);
   }, [activeFilters, selected]);
 
@@ -127,31 +127,46 @@ export default function Page() {
 
   return (
     <div className="flex flex-col h-screen bg-white overflow-hidden" style={sans}>
+
       {/* HEADER */}
-      <header className="shrink-0 border-b border-black/10 bg-white px-4 py-3 flex items-center justify-between z-50">
-        <div className="flex items-center gap-3">
+      <header className="shrink-0 z-50" style={{ background: BRAND }}>
+        <div className="px-4 py-3 flex items-center justify-between">
           <a
             href="https://normanokdevelopment.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 hover:opacity-75 transition-opacity"
+            className="flex items-center gap-3 hover:opacity-85 transition-opacity"
           >
-            <span className="font-bold text-sm text-neutral-900 tracking-tight">Norman Development</span>
-            <span className="text-black/30 text-xs">↗</span>
+            <img src="/nd-icon.png" alt="Norman Development" className="h-8 w-8 object-contain rounded" />
+            <div style={sans}>
+              <div className="text-white font-bold text-sm leading-tight tracking-tight">Norman Development</div>
+              <div className="text-white/70 text-[10px] tracking-wide uppercase">Development Map</div>
+            </div>
           </a>
-          <span className="text-black/20 text-sm">|</span>
-          <span className="text-sm font-medium text-neutral-600">Development Map</span>
+          <div className="flex items-center gap-3">
+            <a
+              href="https://normanokdevelopment.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:block text-white/80 hover:text-white text-xs transition-colors"
+              style={sans}
+            >
+              ← Back to site
+            </a>
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="rounded-lg border border-white/30 bg-white/10 hover:bg-white/20 px-3 py-1.5 text-xs font-medium text-white transition-colors"
+              style={sans}
+            >
+              {sidebarOpen ? "Hide list" : "Show list"}
+            </button>
+          </div>
         </div>
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="rounded-lg border border-black/15 px-3 py-1.5 text-xs font-medium hover:bg-black/5 transition-colors"
-        >
-          {sidebarOpen ? "Hide list" : "Show list"}
-        </button>
       </header>
 
       {/* BODY */}
       <div className="flex flex-1 overflow-hidden">
+
         {/* SIDEBAR */}
         {sidebarOpen && (
           <aside className="w-72 shrink-0 border-r border-black/10 bg-white flex flex-col overflow-hidden">
@@ -163,17 +178,21 @@ export default function Page() {
                 placeholder="Search sites…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-lg border border-black/15 px-3 py-2 text-xs focus:outline-none focus:border-black/30 transition-colors"
+                className="w-full rounded-lg border border-black/15 px-3 py-2 text-xs focus:outline-none transition-colors"
+                style={{ fontFamily: "Arial, Helvetica, sans-serif" }}
+                onFocus={(e) => e.target.style.borderColor = BRAND}
+                onBlur={(e) => e.target.style.borderColor = "rgba(0,0,0,0.15)"}
               />
             </div>
 
             {/* FILTERS */}
-            <div className="px-3 py-2.5 border-b border-black/10 space-y-1.5">
-              <div className="flex items-center justify-between mb-1">
+            <div className="px-3 py-2.5 border-b border-black/10 space-y-1">
+              <div className="flex items-center justify-between mb-1.5">
                 <span className="text-[10px] font-semibold uppercase tracking-widest text-black/40">Filter by status</span>
                 <button
                   onClick={toggleAll}
-                  className="text-[10px] text-black/40 hover:text-black transition-colors"
+                  className="text-[10px] font-medium transition-colors hover:opacity-70"
+                  style={{ color: BRAND }}
                 >
                   {activeFilters.size === ALL_STATUSES.length ? "clear all" : "select all"}
                 </button>
@@ -195,18 +214,20 @@ export default function Page() {
                       <span className="w-2 h-2 rounded-full shrink-0" style={{ background: cfg.dot }} />
                       <span className="font-medium">{cfg.label}</span>
                     </span>
-                    <span className="text-black/40">{count}</span>
+                    <span className="text-black/40 tabular-nums">{count}</span>
                   </button>
                 );
               })}
             </div>
 
-            {/* SITE LIST */}
-            <div className="px-3 py-2 border-b border-black/10">
+            {/* COUNT */}
+            <div className="px-4 py-2 border-b border-black/10">
               <span className="text-[10px] font-semibold uppercase tracking-widest text-black/40">
                 {filteredSites.length} of {SITES.length} sites
               </span>
             </div>
+
+            {/* SITE LIST */}
             <div className="flex-1 overflow-y-auto">
               {filteredSites.length === 0 && (
                 <div className="px-4 py-8 text-center text-xs text-black/40">No sites match your filters.</div>
@@ -219,8 +240,9 @@ export default function Page() {
                     key={site.id}
                     onClick={() => flyTo(site)}
                     className={`w-full text-left px-4 py-3.5 border-b border-black/5 transition-colors ${
-                      isActive ? "bg-neutral-100" : "hover:bg-black/[0.03]"
+                      isActive ? "bg-neutral-50 border-l-2" : "hover:bg-black/[0.02]"
                     }`}
+                    style={isActive ? { borderLeftColor: BRAND } : {}}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <span className="text-sm font-semibold text-neutral-900 leading-snug">{site.name}</span>
@@ -243,8 +265,10 @@ export default function Page() {
 
           {/* DETAIL PANEL */}
           {selected && (
-            <div className="absolute bottom-0 left-0 right-0 sm:bottom-4 sm:left-4 sm:right-auto sm:w-96 bg-white border border-black/10 rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden z-[1000]">
-              <div className="flex items-start justify-between gap-3 px-5 pt-5 pb-3">
+            <div className="absolute bottom-0 left-0 right-0 sm:bottom-4 sm:left-4 sm:right-auto sm:w-96 bg-white border border-black/10 rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden z-[1000]" style={sans}>
+              {/* green top bar */}
+              <div className="h-1 w-full" style={{ background: BRAND }} />
+              <div className="flex items-start justify-between gap-3 px-5 pt-4 pb-3">
                 <div>
                   <StatusBadge status={selected.status} />
                   <h2 className="mt-2 text-base font-bold text-neutral-900 leading-snug">{selected.name}</h2>
@@ -258,14 +282,14 @@ export default function Page() {
                 </button>
               </div>
 
-              <div className="px-5 pb-2">
+              <div className="px-5 pb-3">
                 <p className="text-sm text-neutral-700 leading-6">{selected.description}</p>
               </div>
 
               {selected.articles.length > 0 && (
                 <div className="px-5 pb-3">
-                  <div className="text-xs font-semibold uppercase tracking-widest text-black/40 mb-2">Coverage</div>
-                  <div className="space-y-1.5">
+                  <div className="text-[10px] font-semibold uppercase tracking-widest text-black/40 mb-2">Coverage</div>
+                  <div className="space-y-2">
                     {selected.articles.map((a) => (
                       <a
                         key={a.url}
@@ -274,10 +298,10 @@ export default function Page() {
                         rel="noopener noreferrer"
                         className="flex items-start gap-2 group"
                       >
-                        <span className="text-blue-600 text-xs mt-0.5 shrink-0">↗</span>
+                        <span className="text-xs mt-0.5 shrink-0 font-bold" style={{ color: BRAND }}>↗</span>
                         <div>
-                          <div className="text-sm text-blue-600 group-hover:underline leading-snug">{a.title}</div>
-                          <div className="text-xs text-black/40">{a.date}</div>
+                          <div className="text-sm group-hover:underline leading-snug" style={{ color: BRAND }}>{a.title}</div>
+                          <div className="text-xs text-black/40 mt-0.5">{a.date}</div>
                         </div>
                       </a>
                     ))}
@@ -289,9 +313,10 @@ export default function Page() {
                 <div className="px-5 pb-5">
                   <button
                     onClick={() => setPdfOpen(true)}
-                    className="w-full rounded-xl border border-black/15 px-4 py-2.5 text-sm font-medium hover:bg-black/5 transition-colors text-left flex items-center gap-2"
+                    className="w-full rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors text-left flex items-center gap-2"
+                    style={{ borderColor: BRAND, color: BRAND }}
                   >
-                    <span className="text-black/40">📄</span>
+                    <span>📄</span>
                     View site plan
                   </button>
                 </div>
@@ -311,7 +336,7 @@ export default function Page() {
       {pdfOpen && selected?.planPdf && (
         <div className="fixed inset-0 z-[2000] bg-black/60 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl overflow-hidden w-full max-w-4xl h-[85vh] flex flex-col">
-            <div className="flex items-center justify-between px-5 py-3 border-b border-black/10 shrink-0">
+            <div className="flex items-center justify-between px-5 py-3 border-b border-black/10 shrink-0" style={sans}>
               <span className="font-semibold text-sm">{selected.name} — Site Plan</span>
               <button
                 onClick={() => setPdfOpen(false)}
