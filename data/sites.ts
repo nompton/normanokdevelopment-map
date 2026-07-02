@@ -156,6 +156,23 @@ export const SITES: DevelopmentSite[] = [
     planPdf: undefined,
   },
   {
+    id: "boutique-hotel-campus-corner",
+    name: "Boutique Hotel — Campus Corner",
+    address: "Campus Corner, Norman, OK",
+    lat: 35.2133808481058,
+    lng: -97.44613221165325,
+    status: "completed",
+    description: "Boutique hotel developed at Campus Corner.",
+    articles: [
+      {
+        title: "Boutique Hotel Coming to Campus Corner",
+        url: "https://www.normanokdevelopment.com/2020/03/06/boutique-hotel-coming-to-campus-corner/",
+        date: "March 6, 2020",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "mixed-use-campus-corner",
     name: "Mixed-Use Development — Campus Corner",
     address: "Campus Corner, Norman, OK",
