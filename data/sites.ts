@@ -105,6 +105,23 @@ export const SITES: DevelopmentSite[] = [
     planPdf: undefined,
   },
   {
+    id: "norman-transit-center",
+    name: "Norman Transit Center — Downtown",
+    address: "Downtown Norman, OK",
+    lat: 35.221315197209115,
+    lng: -97.43872835952881,
+    status: "completed",
+    description: "Norman Transit Center neared and reached completion in downtown Norman.",
+    articles: [
+      {
+        title: "Norman Transit Center Nearing Completion in Downtown",
+        url: "https://www.normanokdevelopment.com/2023/10/10/norman-transit-center-nearing-competition-in-downtown/",
+        date: "October 10, 2023",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "salad-chain-main-street",
     name: "Salad Chain — Main Street Redevelopment",
     address: "W Main St, Norman, OK",
