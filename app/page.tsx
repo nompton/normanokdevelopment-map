@@ -4,10 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { SITES, DevelopmentSite, SiteStatus } from "../data/sites";
 
 const STATUS_CONFIG: Record<SiteStatus, { label: string; color: string; dot: string }> = {
-  proposed:           { label: "Proposed",          color: "bg-amber-100 text-amber-800 border-amber-200",  dot: "#f59e0b" },
-  planned:            { label: "Planned",            color: "bg-blue-100 text-blue-800 border-blue-200",    dot: "#3b82f6" },
-  "under-construction": { label: "Under Construction", color: "bg-orange-100 text-orange-800 border-orange-200", dot: "#f97316" },
-  completed:          { label: "Completed",          color: "bg-green-100 text-green-800 border-green-200", dot: "#22c55e" },
+  proposed:             { label: "Proposed",           color: "bg-amber-100 text-amber-800 border-amber-200",   dot: "#f59e0b" },
+  planned:              { label: "Planned",             color: "bg-blue-100 text-blue-800 border-blue-200",     dot: "#3b82f6" },
+  "under-construction": { label: "Under Construction",  color: "bg-orange-100 text-orange-800 border-orange-200", dot: "#f97316" },
+  completed:            { label: "Completed",           color: "bg-green-100 text-green-800 border-green-200",  dot: "#22c55e" },
+  cancelled:            { label: "Cancelled",           color: "bg-neutral-100 text-neutral-500 border-neutral-200", dot: "#9ca3af" },
 };
 
 function StatusBadge({ status }: { status: SiteStatus }) {
