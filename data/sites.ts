@@ -229,6 +229,17 @@ export const SITES: DevelopmentSite[] = [
     planPdf: undefined,
   },
   {
+    id: "lindmark-advertising-hq",
+    name: "Lindmark Advertising Headquarters",
+    address: "Norman, OK",
+    lat: 35.181270046037405,
+    lng: -97.45325014201083,
+    status: "proposed",
+    description: "Proposed headquarters for Lindmark Advertising.",
+    articles: [],
+    planPdf: undefined,
+  },
+  {
     id: "va-clinic-north-norman",
     name: "VA Clinic — North Norman",
     address: "N Norman, OK",
