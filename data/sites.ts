@@ -105,6 +105,23 @@ export const SITES: DevelopmentSite[] = [
     planPdf: undefined,
   },
   {
+    id: "quiktrip-norman",
+    name: "QuikTrip — Norman",
+    address: "W Main St, Norman, OK",
+    lat: 35.21737478243663,
+    lng: -97.48195470108446,
+    status: "under-construction",
+    description: "QuikTrip purchased key Norman parcels and is under construction.",
+    articles: [
+      {
+        title: "QuikTrip Buys Key Norman Parcels",
+        url: "https://www.normanokdevelopment.com/2025/02/07/quiktrip-buys-key-norman-parcels/",
+        date: "February 7, 2025",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "target-south-norman",
     name: "Target — South Norman",
     address: "S Norman, OK",
