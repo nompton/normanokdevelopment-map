@@ -105,6 +105,23 @@ export const SITES: DevelopmentSite[] = [
     planPdf: undefined,
   },
   {
+    id: "taco-chain-lindsey",
+    name: "Dallas Taco Chain — Lindsey Street",
+    address: "W Lindsey St, Norman, OK",
+    lat: 35.20348347811404,
+    lng: -97.4630553081468,
+    status: "completed",
+    description: "Dallas-based taco chain opened on Lindsey Street in Norman.",
+    articles: [
+      {
+        title: "Dallas Taco Chain Coming to Lindsey Street",
+        url: "https://www.normanokdevelopment.com/2021/03/17/dallas-taco-chain-coming-to-lindsey-street/",
+        date: "March 17, 2021",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "coffee-chain-main-street",
     name: "National Coffee Chain — Main Street",
     address: "W Main St, Norman, OK",
