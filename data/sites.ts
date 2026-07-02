@@ -105,6 +105,23 @@ export const SITES: DevelopmentSite[] = [
     planPdf: undefined,
   },
   {
+    id: "mntc-unp-tract",
+    name: "MNTC Land Purchase — University North Park",
+    address: "University North Park, Norman, OK",
+    lat: 35.24888387271859,
+    lng: -97.4773498462076,
+    status: "cancelled",
+    description: "MNTC purchased a large tract of land in University North Park, but the development did not move forward.",
+    articles: [
+      {
+        title: "MNTC Buys Large Tract in UNP",
+        url: "https://www.normanokdevelopment.com/2020/08/05/mntc-buys-large-tract-in-unp/",
+        date: "August 5, 2020",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "norman-regional-new-location",
     name: "Norman Regional Health System — New Location",
     address: "S Norman, OK",
