@@ -32,6 +32,40 @@ export interface DevelopmentSite {
 
 export const SITES: DevelopmentSite[] = [
   {
+    id: "starbucks-classen",
+    name: "Starbucks — Classen Boulevard",
+    address: "Classen Blvd, Norman, OK",
+    lat: 35.182103335367046,
+    lng: -97.41646732194972,
+    status: "completed",
+    description: "Starbucks location on Classen Boulevard, part of a retail development alongside Aldi.",
+    articles: [
+      {
+        title: "Aldi, Starbucks Coming to Classen Boulevard",
+        url: "https://www.normanokdevelopment.com/2018/01/22/aldi-starbucks-coming-to-classen-boulevard/",
+        date: "January 22, 2018",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
+    id: "aldi-classen",
+    name: "Aldi — Classen Boulevard",
+    address: "Classen Blvd, Norman, OK",
+    lat: 35.18087816880417,
+    lng: -97.41563947143807,
+    status: "completed",
+    description: "Aldi grocery store on Classen Boulevard, part of a retail development alongside Starbucks.",
+    articles: [
+      {
+        title: "Aldi, Starbucks Coming to Classen Boulevard",
+        url: "https://www.normanokdevelopment.com/2018/01/22/aldi-starbucks-coming-to-classen-boulevard/",
+        date: "January 22, 2018",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "dicks-sooner-mall",
     name: "Dick's House of Sport — Sooner Mall",
     address: "3301 W Main St, Norman, OK 73072",
