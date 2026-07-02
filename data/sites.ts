@@ -32,6 +32,23 @@ export interface DevelopmentSite {
 
 export const SITES: DevelopmentSite[] = [
   {
+    id: "7eleven-rock-creek-porter",
+    name: "7-Eleven — Rock Creek & Porter",
+    address: "E Rock Creek Rd & Porter Ave, Norman, OK",
+    lat: 35.247827951894635,
+    lng: -97.44062409617595,
+    status: "cancelled",
+    description: "7-Eleven proposed as anchor tenant for a redevelopment at the corner of East Rock Creek Road and Porter Avenue.",
+    articles: [
+      {
+        title: "7-Eleven to Anchor Redevelopment at East Rock Creek and Porter",
+        url: "https://www.normanokdevelopment.com/2018/01/23/7-11-to-anchor-redevelopment-at-east-rock-creek-and-porter/",
+        date: "January 23, 2018",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "office-36th-avenue",
     name: "Office Development — 36th Avenue",
     address: "36th Ave NW, Norman, OK",
