@@ -37,6 +37,23 @@ export interface DevelopmentSite {
 
 export const SITES: DevelopmentSite[] = [
   {
+    id: "office-healthplex",
+    name: "Office Development — Healthplex Campus",
+    address: "Healthplex Campus, Norman, OK",
+    lat: 35.255802981129115,
+    lng: -97.4868492936122,
+    status: "completed",
+    description: "Office development on the Healthplex campus in Norman.",
+    articles: [
+      {
+        title: "Office Development Coming to Healthplex Campus",
+        url: "https://www.normanokdevelopment.com/2018/01/24/office-development-coming-to-healthplex-campus/",
+        date: "January 24, 2018",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "mixed-use-key-west",
     name: "Mixed-Use Development — Key West Corner",
     address: "Key West Ave & N Porter Ave, Norman, OK",
