@@ -105,6 +105,23 @@ export const SITES: DevelopmentSite[] = [
     planPdf: undefined,
   },
   {
+    id: "andys-frozen-custard-west-norman",
+    name: "Andy's Frozen Custard — West Norman",
+    address: "W Norman, OK",
+    lat: 35.23205644140523,
+    lng: -97.48903181637255,
+    status: "completed",
+    description: "Andy's Frozen Custard opened a West Norman location.",
+    articles: [
+      {
+        title: "Andy's Frozen Custard Coming to West Norman",
+        url: "https://www.normanokdevelopment.com/2023/09/23/andys-frozen-custard-coming-to-west-norman/",
+        date: "September 23, 2023",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "dunkin-south-norman",
     name: "Dunkin' — South Norman",
     address: "S Norman, OK",
