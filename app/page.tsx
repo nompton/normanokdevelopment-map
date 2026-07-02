@@ -29,11 +29,16 @@ export default function Page() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const markersRef = useRef<Record<string, any>>({});
+  const baseLayerRef = useRef<any>(null);
+  const aerialLayerRef = useRef<any>(null);
+  const parcelLayerRef = useRef<any>(null);
   const [selected, setSelected] = useState<DevelopmentSite | null>(null);
   const [pdfOpen, setPdfOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeFilters, setActiveFilters] = useState<Set<SiteStatus>>(new Set(ALL_STATUSES));
   const [search, setSearch] = useState("");
+  const [baseLayer, setBaseLayer] = useState<"map" | "aerial">("map");
+  const [showParcels, setShowParcels] = useState(false);
 
   useEffect(() => {
     if (!mapInstanceRef.current) return;
@@ -56,10 +61,20 @@ export default function Page() {
       const map = L.map(mapRef.current!, { scrollWheelZoom: true }).setView([35.2226, -97.4395], 13);
       mapInstanceRef.current = map;
 
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      const base = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
         maxZoom: 19,
-      }).addTo(map);
+      });
+      base.addTo(map);
+      baseLayerRef.current = base;
+
+      aerialLayerRef.current = L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        {
+          attribution: "Tiles © Esri — Source: Esri, USGS, NOAA",
+          maxZoom: 19,
+        }
+      );
 
       SITES.forEach((site) => {
         const cfg = STATUS_CONFIG[site.status];
@@ -83,17 +98,55 @@ export default function Page() {
       document.head.appendChild(link);
     }
 
-    if ((window as any).L) {
-      initMap((window as any).L);
-    } else {
+    function loadLeaflet(cb: (L: any) => void) {
+      if ((window as any).L) { cb((window as any).L); return; }
       const script = document.createElement("script");
       script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
-      script.onload = () => initMap((window as any).L);
+      script.onload = () => cb((window as any).L);
       document.head.appendChild(script);
     }
 
+    loadLeaflet(initMap);
+
     return () => { mapInstanceRef.current?.remove(); mapInstanceRef.current = null; };
   }, []);
+
+  // Switch base layer
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map || !baseLayerRef.current || !aerialLayerRef.current) return;
+    if (baseLayer === "aerial") {
+      map.removeLayer(baseLayerRef.current);
+      aerialLayerRef.current.addTo(map);
+    } else {
+      map.removeLayer(aerialLayerRef.current);
+      baseLayerRef.current.addTo(map);
+    }
+  }, [baseLayer]);
+
+  // Toggle parcel overlay
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+    const L = (window as any).L;
+    if (!L) return;
+
+    if (showParcels) {
+      if (!parcelLayerRef.current) {
+        parcelLayerRef.current = L.tileLayer(
+          `https://services.arcgis.com/rt1leD4Hj3sLGHNL/arcgis/rest/services/Parcels/FeatureServer/1/query?where=1%3D1&outFields=*&f=geojson&resultRecordCount=0`,
+        );
+        // Use WMS-style dynamic tile approach via ArcGIS export
+        parcelLayerRef.current = L.tileLayer(
+          "https://tiles.arcgis.com/tiles/rt1leD4Hj3sLGHNL/arcgis/rest/services/Parcels/MapServer/tile/{z}/{y}/{x}",
+          { opacity: 0.5, maxZoom: 19 }
+        );
+      }
+      parcelLayerRef.current.addTo(map);
+    } else {
+      if (parcelLayerRef.current) map.removeLayer(parcelLayerRef.current);
+    }
+  }, [showParcels]);
 
   function flyTo(site: DevelopmentSite) {
     setSelected(site);
@@ -143,7 +196,30 @@ export default function Page() {
               <div className="text-white/70 text-[10px] tracking-wide uppercase">Development Map</div>
             </div>
           </a>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            {/* Base layer toggle */}
+            <div className="hidden sm:flex items-center rounded-lg border border-white/30 bg-white/10 overflow-hidden text-xs font-medium" style={sans}>
+              <button
+                onClick={() => setBaseLayer("map")}
+                className={`px-3 py-1.5 transition-colors ${baseLayer === "map" ? "bg-white text-black" : "text-white hover:bg-white/20"}`}
+              >
+                Map
+              </button>
+              <button
+                onClick={() => setBaseLayer("aerial")}
+                className={`px-3 py-1.5 transition-colors ${baseLayer === "aerial" ? "bg-white text-black" : "text-white hover:bg-white/20"}`}
+              >
+                Aerial
+              </button>
+            </div>
+            {/* Parcels toggle */}
+            <button
+              onClick={() => setShowParcels(!showParcels)}
+              className={`hidden sm:block rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${showParcels ? "bg-white text-black border-white" : "border-white/30 bg-white/10 text-white hover:bg-white/20"}`}
+              style={sans}
+            >
+              Parcels
+            </button>
             <a
               href="https://normanokdevelopment.com"
               target="_blank"
