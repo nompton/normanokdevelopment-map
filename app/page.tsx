@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { SITES, DevelopmentSite, SiteStatus } from "../data/sites";
 
 const BRAND = "#3a8a6e";
@@ -25,6 +25,8 @@ function StatusBadge({ status }: { status: SiteStatus }) {
   );
 }
 
+const PARCEL_SERVICE = "https://services.arcgis.com/rt1leD4Hj3sLGHNL/arcgis/rest/services/Parcels/FeatureServer/1";
+
 export default function Page() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
@@ -32,60 +34,53 @@ export default function Page() {
   const baseLayerRef = useRef<any>(null);
   const aerialLayerRef = useRef<any>(null);
   const parcelLayerRef = useRef<any>(null);
+
   const [selected, setSelected] = useState<DevelopmentSite | null>(null);
   const [pdfOpen, setPdfOpen] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [listOpen, setListOpen] = useState(false);
   const [activeFilters, setActiveFilters] = useState<Set<SiteStatus>>(new Set(ALL_STATUSES));
   const [search, setSearch] = useState("");
-  const [baseLayer, setBaseLayer] = useState<"map" | "aerial">("map");
+  const [baseMap, setBaseMap] = useState<"street" | "aerial">("street");
   const [showParcels, setShowParcels] = useState(false);
+  const [parcelLoading, setParcelLoading] = useState(false);
 
-  useEffect(() => {
-    if (!mapInstanceRef.current) return;
-    SITES.forEach((site) => {
-      const marker = markersRef.current[site.id];
-      if (!marker) return;
-      if (activeFilters.has(site.status)) {
-        marker.addTo(mapInstanceRef.current);
-      } else {
-        marker.remove();
-      }
-    });
-    if (selected && !activeFilters.has(selected.status)) setSelected(null);
-  }, [activeFilters, selected]);
-
+  // ── MAP INIT ──────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
 
     function initMap(L: any) {
-      const map = L.map(mapRef.current!, { scrollWheelZoom: true }).setView([35.2226, -97.4395], 13);
+      const map = L.map(mapRef.current!, { scrollWheelZoom: true, zoomControl: false }).setView([35.2226, -97.4395], 13);
       mapInstanceRef.current = map;
 
-      const base = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      // Move zoom control to bottom-right (out of mobile bottom bar)
+      L.control.zoom({ position: "bottomright" }).addTo(map);
+
+      const street = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
         maxZoom: 19,
       });
-      base.addTo(map);
-      baseLayerRef.current = base;
+      street.addTo(map);
+      baseLayerRef.current = street;
 
       aerialLayerRef.current = L.tileLayer(
         "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-        {
-          attribution: "Tiles © Esri — Source: Esri, USGS, NOAA",
-          maxZoom: 19,
-        }
+        { attribution: "Tiles © Esri", maxZoom: 19 }
       );
 
+      // Site markers
       SITES.forEach((site) => {
         const cfg = STATUS_CONFIG[site.status];
         const icon = L.divIcon({
           className: "",
-          html: `<div style="width:14px;height:14px;background:${cfg.dot};border:2.5px solid white;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.35)"></div>`,
+          html: `<div style="width:14px;height:14px;background:${cfg.dot};border:2.5px solid white;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>`,
           iconSize: [14, 14],
           iconAnchor: [7, 7],
         });
         const marker = L.marker([site.lat, site.lng], { icon }).addTo(map);
-        marker.on("click", () => { setSelected(site); setSidebarOpen(true); });
+        marker.on("click", () => {
+          setSelected(site);
+          setListOpen(false);
+        });
         markersRef.current[site.id] = marker;
       });
     }
@@ -98,74 +93,112 @@ export default function Page() {
       document.head.appendChild(link);
     }
 
-    function loadLeaflet(cb: (L: any) => void) {
+    const load = (cb: (L: any) => void) => {
       if ((window as any).L) { cb((window as any).L); return; }
-      const script = document.createElement("script");
-      script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
-      script.onload = () => cb((window as any).L);
-      document.head.appendChild(script);
-    }
-
-    loadLeaflet(initMap);
+      const s = document.createElement("script");
+      s.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+      s.onload = () => cb((window as any).L);
+      document.head.appendChild(s);
+    };
+    load(initMap);
 
     return () => { mapInstanceRef.current?.remove(); mapInstanceRef.current = null; };
   }, []);
 
-  // Switch base layer
+  // ── FILTER MARKERS ────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!mapInstanceRef.current) return;
+    SITES.forEach((site) => {
+      const marker = markersRef.current[site.id];
+      if (!marker) return;
+      activeFilters.has(site.status) ? marker.addTo(mapInstanceRef.current) : marker.remove();
+    });
+    if (selected && !activeFilters.has(selected.status)) setSelected(null);
+  }, [activeFilters, selected]);
+
+  // ── BASE LAYER TOGGLE ─────────────────────────────────────────────────────
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map || !baseLayerRef.current || !aerialLayerRef.current) return;
-    if (baseLayer === "aerial") {
+    if (baseMap === "aerial") {
       map.removeLayer(baseLayerRef.current);
       aerialLayerRef.current.addTo(map);
     } else {
       map.removeLayer(aerialLayerRef.current);
       baseLayerRef.current.addTo(map);
     }
-  }, [baseLayer]);
+  }, [baseMap]);
 
-  // Toggle parcel overlay
+  // ── PARCEL OVERLAY ────────────────────────────────────────────────────────
+  const loadParcels = useCallback(async () => {
+    const map = mapInstanceRef.current;
+    const L = (window as any).L;
+    if (!map || !L || !showParcels) return;
+
+    const bounds = map.getBounds();
+    const bbox = [
+      bounds.getWest(), bounds.getSouth(),
+      bounds.getEast(), bounds.getNorth(),
+    ].join(",");
+
+    setParcelLoading(true);
+    try {
+      const url = `${PARCEL_SERVICE}/query?where=1%3D1&geometry=${bbox}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=GEONUMBER,F_ADD,STREET_NAME,ACREAGE&f=geojson&resultRecordCount=500`;
+      const res = await fetch(url);
+      const geojson = await res.json();
+
+      if (parcelLayerRef.current) map.removeLayer(parcelLayerRef.current);
+      parcelLayerRef.current = L.geoJSON(geojson, {
+        style: {
+          color: baseMap === "aerial" ? "#ffffff" : "#e67e22",
+          weight: 1,
+          opacity: 0.7,
+          fillOpacity: 0.08,
+          fillColor: baseMap === "aerial" ? "#ffffff" : "#e67e22",
+        },
+        onEachFeature: (feature: any, layer: any) => {
+          const p = feature.properties;
+          if (p?.STREET_NAME) {
+            layer.bindTooltip(`${p.F_ADD || ""} ${p.STREET_NAME}`.trim(), { sticky: true, className: "text-xs" });
+          }
+        },
+      }).addTo(map);
+    } catch (e) {
+      console.error("Parcel load error", e);
+    }
+    setParcelLoading(false);
+  }, [showParcels, baseMap]);
+
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map) return;
-    const L = (window as any).L;
-    if (!L) return;
-
-    if (showParcels) {
-      if (!parcelLayerRef.current) {
-        parcelLayerRef.current = L.tileLayer(
-          `https://services.arcgis.com/rt1leD4Hj3sLGHNL/arcgis/rest/services/Parcels/FeatureServer/1/query?where=1%3D1&outFields=*&f=geojson&resultRecordCount=0`,
-        );
-        // Use WMS-style dynamic tile approach via ArcGIS export
-        parcelLayerRef.current = L.tileLayer(
-          "https://tiles.arcgis.com/tiles/rt1leD4Hj3sLGHNL/arcgis/rest/services/Parcels/MapServer/tile/{z}/{y}/{x}",
-          { opacity: 0.5, maxZoom: 19 }
-        );
-      }
-      parcelLayerRef.current.addTo(map);
-    } else {
-      if (parcelLayerRef.current) map.removeLayer(parcelLayerRef.current);
+    if (!showParcels) {
+      if (parcelLayerRef.current) { map.removeLayer(parcelLayerRef.current); parcelLayerRef.current = null; }
+      return;
     }
-  }, [showParcels]);
+    loadParcels();
+    map.on("moveend", loadParcels);
+    return () => { map.off("moveend", loadParcels); };
+  }, [showParcels, loadParcels]);
 
+  // Update parcel color when base layer changes
+  useEffect(() => {
+    if (showParcels) loadParcels();
+  }, [baseMap]);
+
+  // ── HELPERS ───────────────────────────────────────────────────────────────
   function flyTo(site: DevelopmentSite) {
     setSelected(site);
-    setSidebarOpen(true);
-    mapInstanceRef.current?.flyTo([site.lat, site.lng], 16, { duration: 0.8 });
+    setListOpen(false);
+    mapInstanceRef.current?.flyTo([site.lat, site.lng], 17, { duration: 0.8 });
   }
 
   function toggleFilter(status: SiteStatus) {
     setActiveFilters((prev) => {
       const next = new Set(prev);
-      if (next.has(status)) { next.delete(status); } else { next.add(status); }
+      next.has(status) ? next.delete(status) : next.add(status);
       return next;
     });
-  }
-
-  function toggleAll() {
-    setActiveFilters((prev) =>
-      prev.size === ALL_STATUSES.length ? new Set() : new Set(ALL_STATUSES)
-    );
   }
 
   const filteredSites = SITES.filter(
@@ -181,157 +214,62 @@ export default function Page() {
   return (
     <div className="flex flex-col h-screen bg-white overflow-hidden" style={sans}>
 
-      {/* HEADER */}
+      {/* ── HEADER ── */}
       <header className="shrink-0 z-50" style={{ background: BRAND }}>
-        <div className="px-4 py-3 flex items-center justify-between">
-          <a
-            href="https://normanokdevelopment.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-3 hover:opacity-85 transition-opacity"
-          >
-            <img src="/icon.png" alt="Norman Development" className="h-8 w-8 object-contain rounded" />
-            <div style={sans}>
-              <div className="text-white font-bold text-sm leading-tight tracking-tight">Norman Development</div>
-              <div className="text-white/70 text-[10px] tracking-wide uppercase">Development Map</div>
+        <div className="px-4 py-3 flex items-center justify-between gap-2">
+          <a href="https://normanokdevelopment.com" target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-2.5 hover:opacity-85 transition-opacity min-w-0">
+            <img src="/icon.png" alt="ND" className="h-7 w-7 object-contain rounded shrink-0" />
+            <div className="min-w-0">
+              <div className="text-white font-bold text-sm leading-tight tracking-tight truncate">Norman Development</div>
+              <div className="text-white/60 text-[10px] tracking-wide uppercase hidden sm:block">Development Map</div>
             </div>
           </a>
-          <div className="flex items-center gap-2">
-            {/* Base layer toggle */}
-            <div className="hidden sm:flex items-center rounded-lg border border-white/30 bg-white/10 overflow-hidden text-xs font-medium" style={sans}>
-              <button
-                onClick={() => setBaseLayer("map")}
-                className={`px-3 py-1.5 transition-colors ${baseLayer === "map" ? "bg-white text-black" : "text-white hover:bg-white/20"}`}
-              >
+
+          <div className="flex items-center gap-1.5 shrink-0">
+            {/* Map/Aerial */}
+            <div className="flex rounded-lg border border-white/30 bg-white/10 overflow-hidden text-xs font-medium">
+              <button onClick={() => setBaseMap("street")}
+                className={`px-2.5 py-1.5 transition-colors ${baseMap === "street" ? "bg-white text-black" : "text-white hover:bg-white/20"}`}>
                 Map
               </button>
-              <button
-                onClick={() => setBaseLayer("aerial")}
-                className={`px-3 py-1.5 transition-colors ${baseLayer === "aerial" ? "bg-white text-black" : "text-white hover:bg-white/20"}`}
-              >
+              <button onClick={() => setBaseMap("aerial")}
+                className={`px-2.5 py-1.5 transition-colors ${baseMap === "aerial" ? "bg-white text-black" : "text-white hover:bg-white/20"}`}>
                 Aerial
               </button>
             </div>
-            {/* Parcels toggle */}
-            <button
-              onClick={() => setShowParcels(!showParcels)}
-              className={`hidden sm:block rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${showParcels ? "bg-white text-black border-white" : "border-white/30 bg-white/10 text-white hover:bg-white/20"}`}
-              style={sans}
-            >
+            {/* Parcels */}
+            <button onClick={() => setShowParcels(!showParcels)}
+              className={`rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors flex items-center gap-1 ${showParcels ? "bg-white text-black border-white" : "border-white/30 bg-white/10 text-white hover:bg-white/20"}`}>
+              {parcelLoading ? <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin inline-block" /> : null}
               Parcels
             </button>
-            <a
-              href="https://normanokdevelopment.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden sm:block text-white/80 hover:text-white text-xs transition-colors"
-              style={sans}
-            >
-              ← Back to site
-            </a>
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="rounded-lg border border-white/30 bg-white/10 hover:bg-white/20 px-3 py-1.5 text-xs font-medium text-white transition-colors"
-              style={sans}
-            >
-              {sidebarOpen ? "Hide list" : "Show list"}
+            {/* List toggle (desktop) */}
+            <button onClick={() => setListOpen(!listOpen)}
+              className="hidden md:block rounded-lg border border-white/30 bg-white/10 hover:bg-white/20 px-2.5 py-1.5 text-xs font-medium text-white transition-colors">
+              {listOpen ? "Hide list" : "Sites"}
             </button>
           </div>
         </div>
       </header>
 
-      {/* BODY */}
-      <div className="flex flex-1 overflow-hidden">
+      {/* ── BODY ── */}
+      <div className="flex flex-1 overflow-hidden relative">
 
-        {/* SIDEBAR */}
-        {sidebarOpen && (
-          <aside className="w-72 shrink-0 border-r border-black/10 bg-white flex flex-col overflow-hidden">
-
-            {/* SEARCH */}
-            <div className="px-3 pt-3 pb-2 border-b border-black/10">
-              <input
-                type="text"
-                placeholder="Search sites…"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-lg border border-black/15 px-3 py-2 text-xs focus:outline-none transition-colors"
-                style={{ fontFamily: "Arial, Helvetica, sans-serif" }}
-                onFocus={(e) => e.target.style.borderColor = BRAND}
-                onBlur={(e) => e.target.style.borderColor = "rgba(0,0,0,0.15)"}
-              />
-            </div>
-
-            {/* FILTERS */}
-            <div className="px-3 py-2.5 border-b border-black/10 space-y-1">
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[10px] font-semibold uppercase tracking-widest text-black/40">Filter by status</span>
-                <button
-                  onClick={toggleAll}
-                  className="text-[10px] font-medium transition-colors hover:opacity-70"
-                  style={{ color: BRAND }}
-                >
-                  {activeFilters.size === ALL_STATUSES.length ? "clear all" : "select all"}
-                </button>
-              </div>
-              {ALL_STATUSES.map((status) => {
-                const cfg = STATUS_CONFIG[status];
-                const count = SITES.filter((s) => s.status === status).length;
-                const active = activeFilters.has(status);
-                return (
-                  <button
-                    key={status}
-                    onClick={() => toggleFilter(status)}
-                    title={cfg.tip}
-                    className={`w-full flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs transition-all border ${
-                      active ? "border-black/15 bg-white" : "border-transparent bg-black/[0.02] opacity-40"
-                    }`}
-                  >
-                    <span className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full shrink-0" style={{ background: cfg.dot }} />
-                      <span className="font-medium">{cfg.label}</span>
-                    </span>
-                    <span className="text-black/40 tabular-nums">{count}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* COUNT */}
-            <div className="px-4 py-2 border-b border-black/10">
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-black/40">
-                {filteredSites.length} of {SITES.length} sites
-              </span>
-            </div>
-
-            {/* SITE LIST */}
-            <div className="flex-1 overflow-y-auto">
-              {filteredSites.length === 0 && (
-                <div className="px-4 py-8 text-center text-xs text-black/40">No sites match your filters.</div>
-              )}
-              {filteredSites.map((site) => {
-                const cfg = STATUS_CONFIG[site.status];
-                const isActive = selected?.id === site.id;
-                return (
-                  <button
-                    key={site.id}
-                    onClick={() => flyTo(site)}
-                    className={`w-full text-left px-4 py-3.5 border-b border-black/5 transition-colors ${
-                      isActive ? "bg-neutral-50 border-l-2" : "hover:bg-black/[0.02]"
-                    }`}
-                    style={isActive ? { borderLeftColor: BRAND } : {}}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <span className="text-sm font-semibold text-neutral-900 leading-snug">{site.name}</span>
-                      <span className="w-2.5 h-2.5 rounded-full shrink-0 mt-1" style={{ background: cfg.dot }} />
-                    </div>
-                    <div className="mt-1 text-xs text-black/50 truncate">{site.address}</div>
-                    <div className="mt-1.5">
-                      <StatusBadge status={site.status} />
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
+        {/* Desktop sidebar */}
+        {listOpen && (
+          <aside className="hidden md:flex w-72 shrink-0 border-r border-black/10 bg-white flex-col overflow-hidden z-40">
+            <SiteList
+              filteredSites={filteredSites}
+              allSites={SITES}
+              activeFilters={activeFilters}
+              search={search}
+              selected={selected}
+              onSearch={setSearch}
+              onToggleFilter={toggleFilter}
+              onToggleAll={() => setActiveFilters(prev => prev.size === ALL_STATUSES.length ? new Set() : new Set(ALL_STATUSES))}
+              onSelect={flyTo}
+            />
           </aside>
         )}
 
@@ -339,96 +277,202 @@ export default function Page() {
         <div className="relative flex-1">
           <div ref={mapRef} className="w-full h-full" />
 
-          {/* DETAIL PANEL */}
+          {/* Site detail panel — bottom sheet on mobile, floating card on desktop */}
           {selected && (
-            <div className="absolute bottom-0 left-0 right-0 sm:bottom-4 sm:left-4 sm:right-auto sm:w-96 bg-white border border-black/10 rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden z-[1000]" style={sans}>
-              {/* green top bar */}
+            <div className="absolute bottom-16 md:bottom-4 left-0 right-0 mx-2 md:mx-0 md:left-4 md:right-auto md:w-96 bg-white border border-black/10 rounded-2xl shadow-xl overflow-hidden z-[1000]" style={sans}>
               <div className="h-1 w-full" style={{ background: BRAND }} />
-              <div className="flex items-start justify-between gap-3 px-5 pt-4 pb-3">
-                <div>
+              <div className="flex items-start justify-between gap-3 px-4 pt-4 pb-2">
+                <div className="min-w-0">
                   <StatusBadge status={selected.status} />
-                  <h2 className="mt-2 text-base font-bold text-neutral-900 leading-snug">{selected.name}</h2>
-                  <p className="mt-0.5 text-xs text-black/50">{selected.address}</p>
+                  <h2 className="mt-1.5 text-sm font-bold text-neutral-900 leading-snug">{selected.name}</h2>
+                  <p className="mt-0.5 text-xs text-black/50 truncate">{selected.address}</p>
                 </div>
-                <button
-                  onClick={() => setSelected(null)}
-                  className="shrink-0 rounded-full w-7 h-7 flex items-center justify-center text-black/40 hover:bg-black/10 transition-colors text-sm mt-0.5"
-                >
+                <button onClick={() => setSelected(null)}
+                  className="shrink-0 rounded-full w-7 h-7 flex items-center justify-center text-black/40 hover:bg-black/10 transition-colors text-sm">
                   ✕
                 </button>
               </div>
-
-              <div className="px-5 pb-3">
-                <p className="text-sm text-neutral-700 leading-6">{selected.description}</p>
+              <div className="px-4 pb-2">
+                <p className="text-xs text-neutral-700 leading-5">{selected.description}</p>
               </div>
-
               {selected.articles.length > 0 && (
-                <div className="px-5 pb-3">
-                  <div className="text-[10px] font-semibold uppercase tracking-widest text-black/40 mb-2">Coverage</div>
-                  <div className="space-y-2">
+                <div className="px-4 pb-3">
+                  <div className="text-[10px] font-semibold uppercase tracking-widest text-black/40 mb-1.5">Coverage</div>
+                  <div className="space-y-1.5">
                     {selected.articles.map((a) => (
-                      <a
-                        key={a.url}
-                        href={a.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-start gap-2 group"
-                      >
-                        <span className="text-xs mt-0.5 shrink-0 font-bold" style={{ color: BRAND }}>↗</span>
+                      <a key={a.url} href={a.url} target="_blank" rel="noopener noreferrer" className="flex items-start gap-1.5 group">
+                        <span className="text-xs shrink-0 font-bold mt-0.5" style={{ color: BRAND }}>↗</span>
                         <div>
-                          <div className="text-sm group-hover:underline leading-snug" style={{ color: BRAND }}>{a.title}</div>
-                          <div className="text-xs text-black/40 mt-0.5">{a.date}</div>
+                          <div className="text-xs group-hover:underline leading-snug" style={{ color: BRAND }}>{a.title}</div>
+                          {a.date && <div className="text-[10px] text-black/40 mt-0.5">{a.date}</div>}
                         </div>
                       </a>
                     ))}
                   </div>
                 </div>
               )}
-
               {selected.planPdf ? (
-                <div className="px-5 pb-5">
-                  <button
-                    onClick={() => setPdfOpen(true)}
-                    className="w-full rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors text-left flex items-center gap-2"
-                    style={{ borderColor: BRAND, color: BRAND }}
-                  >
-                    <span>📄</span>
-                    View site plan
+                <div className="px-4 pb-4">
+                  <button onClick={() => setPdfOpen(true)}
+                    className="w-full rounded-xl border px-3 py-2 text-xs font-medium transition-colors text-left flex items-center gap-2"
+                    style={{ borderColor: BRAND, color: BRAND }}>
+                    <span>📄</span> View site plan
                   </button>
                 </div>
               ) : (
-                <div className="px-5 pb-5">
-                  <div className="rounded-xl border border-black/10 bg-black/[0.02] px-4 py-2.5 text-xs text-black/40">
-                    No site plan on file yet
-                  </div>
+                <div className="px-4 pb-4">
+                  <div className="rounded-xl border border-black/10 bg-black/[0.02] px-3 py-2 text-xs text-black/40">No site plan on file yet</div>
                 </div>
               )}
             </div>
           )}
         </div>
+
+        {/* Mobile list bottom sheet */}
+        {listOpen && (
+          <div className="md:hidden absolute inset-0 z-30 flex flex-col justify-end">
+            <div className="absolute inset-0 bg-black/30" onClick={() => setListOpen(false)} />
+            <div className="relative bg-white rounded-t-2xl flex flex-col overflow-hidden" style={{ maxHeight: "75vh" }}>
+              <div className="flex items-center justify-between px-4 py-3 border-b border-black/10 shrink-0">
+                <span className="text-sm font-semibold">Development Sites</span>
+                <button onClick={() => setListOpen(false)} className="text-black/40 text-lg w-8 h-8 flex items-center justify-center">✕</button>
+              </div>
+              <SiteList
+                filteredSites={filteredSites}
+                allSites={SITES}
+                activeFilters={activeFilters}
+                search={search}
+                selected={selected}
+                onSearch={setSearch}
+                onToggleFilter={toggleFilter}
+                onToggleAll={() => setActiveFilters(prev => prev.size === ALL_STATUSES.length ? new Set() : new Set(ALL_STATUSES))}
+                onSelect={flyTo}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* PDF MODAL */}
+      {/* ── MOBILE BOTTOM BAR ── */}
+      <div className="md:hidden shrink-0 border-t border-black/10 bg-white flex items-center justify-around px-4 py-2 z-40">
+        <button onClick={() => { setListOpen(!listOpen); setSelected(null); }}
+          className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg transition-colors"
+          style={{ color: listOpen ? BRAND : undefined }}>
+          <span className="text-lg">☰</span>
+          <span className="text-[10px] font-medium">Sites</span>
+        </button>
+        <button onClick={() => setBaseMap(baseMap === "street" ? "aerial" : "street")}
+          className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg transition-colors"
+          style={{ color: baseMap === "aerial" ? BRAND : undefined }}>
+          <span className="text-lg">🛰</span>
+          <span className="text-[10px] font-medium">{baseMap === "aerial" ? "Street" : "Aerial"}</span>
+        </button>
+        <button onClick={() => setShowParcels(!showParcels)}
+          className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg transition-colors"
+          style={{ color: showParcels ? BRAND : undefined }}>
+          <span className="text-lg">🗺</span>
+          <span className="text-[10px] font-medium">Parcels</span>
+        </button>
+        <a href="https://normanokdevelopment.com" target="_blank" rel="noopener noreferrer"
+          className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg text-black/50">
+          <span className="text-lg">↗</span>
+          <span className="text-[10px] font-medium">ND Site</span>
+        </a>
+      </div>
+
+      {/* ── PDF MODAL ── */}
       {pdfOpen && selected?.planPdf && (
-        <div className="fixed inset-0 z-[2000] bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl overflow-hidden w-full max-w-4xl h-[85vh] flex flex-col">
+        <div className="fixed inset-0 z-[2000] bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl overflow-hidden w-full sm:max-w-4xl h-[90vh] sm:h-[85vh] flex flex-col">
             <div className="flex items-center justify-between px-5 py-3 border-b border-black/10 shrink-0" style={sans}>
               <span className="font-semibold text-sm">{selected.name} — Site Plan</span>
-              <button
-                onClick={() => setPdfOpen(false)}
-                className="rounded-full w-8 h-8 flex items-center justify-center hover:bg-black/10 transition-colors text-black/60"
-              >
-                ✕
-              </button>
+              <button onClick={() => setPdfOpen(false)}
+                className="rounded-full w-8 h-8 flex items-center justify-center hover:bg-black/10 transition-colors text-black/60">✕</button>
             </div>
-            <iframe
-              src={`/plans/${selected.planPdf}`}
-              className="flex-1 w-full"
-              title={`${selected.name} site plan`}
-            />
+            <iframe src={`/plans/${selected.planPdf}`} className="flex-1 w-full" title={`${selected.name} site plan`} />
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ── SITE LIST COMPONENT ───────────────────────────────────────────────────────
+function SiteList({ filteredSites, allSites, activeFilters, search, selected, onSearch, onToggleFilter, onToggleAll, onSelect }: {
+  filteredSites: DevelopmentSite[];
+  allSites: DevelopmentSite[];
+  activeFilters: Set<SiteStatus>;
+  search: string;
+  selected: DevelopmentSite | null;
+  onSearch: (s: string) => void;
+  onToggleFilter: (s: SiteStatus) => void;
+  onToggleAll: () => void;
+  onSelect: (s: DevelopmentSite) => void;
+}) {
+  const sans = { fontFamily: "Arial, Helvetica, sans-serif" };
+  return (
+    <div className="flex flex-col flex-1 overflow-hidden" style={sans}>
+      {/* Search */}
+      <div className="px-3 pt-3 pb-2 border-b border-black/10 shrink-0">
+        <input type="text" placeholder="Search sites…" value={search} onChange={(e) => onSearch(e.target.value)}
+          className="w-full rounded-lg border border-black/15 px-3 py-2 text-xs focus:outline-none transition-colors"
+          onFocus={(e) => e.target.style.borderColor = BRAND}
+          onBlur={(e) => e.target.style.borderColor = "rgba(0,0,0,0.15)"} />
+      </div>
+      {/* Filters */}
+      <div className="px-3 py-2.5 border-b border-black/10 space-y-1 shrink-0">
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-black/40">Filter</span>
+          <button onClick={onToggleAll} className="text-[10px] font-medium hover:opacity-70 transition-colors" style={{ color: BRAND }}>
+            {activeFilters.size === ALL_STATUSES.length ? "clear all" : "select all"}
+          </button>
+        </div>
+        <div className="grid grid-cols-2 gap-1">
+          {ALL_STATUSES.map((status) => {
+            const cfg = STATUS_CONFIG[status];
+            const count = allSites.filter((s) => s.status === status).length;
+            const active = activeFilters.has(status);
+            return (
+              <button key={status} onClick={() => onToggleFilter(status)} title={cfg.tip}
+                className={`flex items-center justify-between rounded-lg px-2 py-1.5 text-xs transition-all border ${active ? "border-black/15 bg-white" : "border-transparent bg-black/[0.02] opacity-40"}`}>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full shrink-0" style={{ background: cfg.dot }} />
+                  <span className="font-medium truncate">{cfg.label}</span>
+                </span>
+                <span className="text-black/40 tabular-nums ml-1">{count}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      {/* Count */}
+      <div className="px-4 py-2 border-b border-black/10 shrink-0">
+        <span className="text-[10px] font-semibold uppercase tracking-widest text-black/40">
+          {filteredSites.length} of {allSites.length} sites
+        </span>
+      </div>
+      {/* List */}
+      <div className="flex-1 overflow-y-auto">
+        {filteredSites.length === 0 && (
+          <div className="px-4 py-8 text-center text-xs text-black/40">No sites match your filters.</div>
+        )}
+        {filteredSites.map((site) => {
+          const cfg = STATUS_CONFIG[site.status];
+          const isActive = selected?.id === site.id;
+          return (
+            <button key={site.id} onClick={() => onSelect(site)}
+              className={`w-full text-left px-4 py-3 border-b border-black/5 transition-colors ${isActive ? "bg-neutral-50 border-l-2" : "hover:bg-black/[0.02]"}`}
+              style={isActive ? { borderLeftColor: BRAND } : {}}>
+              <div className="flex items-start justify-between gap-2">
+                <span className="text-sm font-semibold text-neutral-900 leading-snug">{site.name}</span>
+                <span className="w-2.5 h-2.5 rounded-full shrink-0 mt-1" style={{ background: cfg.dot }} />
+              </div>
+              <div className="mt-0.5 text-xs text-black/50 truncate">{site.address}</div>
+              <div className="mt-1.5"><StatusBadge status={site.status} /></div>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
