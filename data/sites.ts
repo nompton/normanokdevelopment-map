@@ -220,6 +220,11 @@ export const SITES: DevelopmentSite[] = [
         url: "https://www.normanokdevelopment.com/2018/01/22/aldi-starbucks-coming-to-classen-boulevard/",
         date: "January 22, 2018",
       },
+      {
+        title: "Starbucks Coming to South Norman",
+        url: "https://www.normanokdevelopment.com/2018/03/31/starbucks-coming-to-south-norman/",
+        date: "March 31, 2018",
+      },
     ],
     planPdf: undefined,
   },
