@@ -105,6 +105,57 @@ export const SITES: DevelopmentSite[] = [
     planPdf: undefined,
   },
   {
+    id: "pf-changs-unp",
+    name: "P.F. Chang's — University North Park",
+    address: "University North Park, Norman, OK",
+    lat: 35.24010287824189,
+    lng: -97.48159328717996,
+    status: "completed",
+    description: "P.F. Chang's opened at University North Park alongside Brockhaus Jewelry.",
+    articles: [
+      {
+        title: "P.F. Chang's, Brockhaus Jewelry Coming to UNP",
+        url: "https://www.normanokdevelopment.com/2024/01/26/p-f-changs-brockhaus-jewelry-coming-to-unp/",
+        date: "January 26, 2024",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
+    id: "brockhaus-jewelry-unp",
+    name: "Brockhaus Jewelry — University North Park",
+    address: "University North Park, Norman, OK",
+    lat: 35.24085116348447,
+    lng: -97.48137403675496,
+    status: "completed",
+    description: "Brockhaus Jewelry opened at University North Park alongside P.F. Chang's.",
+    articles: [
+      {
+        title: "P.F. Chang's, Brockhaus Jewelry Coming to UNP",
+        url: "https://www.normanokdevelopment.com/2024/01/26/p-f-changs-brockhaus-jewelry-coming-to-unp/",
+        date: "January 26, 2024",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
+    id: "nps-journey-church",
+    name: "Norman Public Schools — Former Journey Church",
+    address: "N Norman, OK",
+    lat: 35.26452491809215,
+    lng: -97.48816817683803,
+    status: "completed",
+    description: "Norman Public Schools purchased the former Journey Church building.",
+    articles: [
+      {
+        title: "Norman Public Schools to Purchase Former Journey Church",
+        url: "https://www.normanokdevelopment.com/2024/02/05/norman-public-schools-to-purchase-former-journey-church/",
+        date: "February 5, 2024",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "whataburger-south-norman",
     name: "Whataburger — Second Norman Location",
     address: "S Norman, OK",
