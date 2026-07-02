@@ -229,6 +229,17 @@ export const SITES: DevelopmentSite[] = [
     planPdf: undefined,
   },
   {
+    id: "sooner-legends-hotel-site",
+    name: "Former Sooner Legends Hotel — Vacant Site",
+    address: "W Main St, Norman, OK",
+    lat: 35.20277015487883,
+    lng: -97.47827811918253,
+    status: "proposed",
+    description: "The former Sooner Legends Hotel was demolished. The site is currently vacant with no development proposed yet.",
+    articles: [],
+    planPdf: undefined,
+  },
+  {
     id: "shake-shack-unp",
     name: "Shake Shack — University North Park",
     address: "University North Park, Norman, OK",
