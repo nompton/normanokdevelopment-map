@@ -105,6 +105,23 @@ export const SITES: DevelopmentSite[] = [
     planPdf: undefined,
   },
   {
+    id: "norman-regional-new-location",
+    name: "Norman Regional Health System — New Location",
+    address: "S Norman, OK",
+    lat: 35.18687024046427,
+    lng: -97.40779760748447,
+    status: "completed",
+    description: "Norman Regional Health System planned and built a new location in South Norman.",
+    articles: [
+      {
+        title: "Norman Regional Health System Plans New Location",
+        url: "https://www.normanokdevelopment.com/2020/04/19/norman-regional-health-system-plans-new-location/",
+        date: "April 19, 2020",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "planet-fitness-golds-gym",
     name: "Planet Fitness — Former Gold's Gym",
     address: "E Lindsey St, Norman, OK",
