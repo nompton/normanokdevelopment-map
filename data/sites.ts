@@ -105,6 +105,40 @@ export const SITES: DevelopmentSite[] = [
     planPdf: undefined,
   },
   {
+    id: "skechers-parkway-plaza",
+    name: "Skechers — Parkway Plaza",
+    address: "Parkway Plaza, Norman, OK",
+    lat: 35.21176634372025,
+    lng: -97.4848886454445,
+    status: "completed",
+    description: "Skechers opened in Parkway Plaza alongside Burlington.",
+    articles: [
+      {
+        title: "Skechers, Burlington to Occupy Space in Parkway Plaza",
+        url: "https://www.normanokdevelopment.com/2023/06/21/skechers-burlington-to-occupy-space-in-parkway-plaza/",
+        date: "June 21, 2023",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
+    id: "burlington-parkway-plaza",
+    name: "Burlington — Parkway Plaza",
+    address: "Parkway Plaza, Norman, OK",
+    lat: 35.210575109093895,
+    lng: -97.48557478239951,
+    status: "completed",
+    description: "Burlington opened in Parkway Plaza alongside Skechers.",
+    articles: [
+      {
+        title: "Skechers, Burlington to Occupy Space in Parkway Plaza",
+        url: "https://www.normanokdevelopment.com/2023/06/21/skechers-burlington-to-occupy-space-in-parkway-plaza/",
+        date: "June 21, 2023",
+      },
+    ],
+    planPdf: undefined,
+  },
+  {
     id: "student-housing-ou-motel",
     name: "Student Housing — Former OU Motel Site",
     address: "E Lindsey St, Norman, OK",
