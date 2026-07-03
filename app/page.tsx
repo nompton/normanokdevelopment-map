@@ -116,6 +116,15 @@ export default function Page() {
     if (selected && !activeFilters.has(selected.status)) setSelected(null);
   }, [activeFilters, selected]);
 
+  // ── INVALIDATE MAP SIZE WHEN SIDEBAR OPENS/CLOSES ────────────────────────
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+    // Small delay so the DOM has finished resizing before we remeasure
+    const t = setTimeout(() => map.invalidateSize(), 50);
+    return () => clearTimeout(t);
+  }, [listOpen]);
+
   // ── BASE LAYER TOGGLE ─────────────────────────────────────────────────────
   useEffect(() => {
     const map = mapInstanceRef.current;
