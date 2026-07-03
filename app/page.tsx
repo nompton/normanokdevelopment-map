@@ -195,6 +195,7 @@ export default function Page() {
   // ── HELPERS ───────────────────────────────────────────────────────────────
   function flyTo(site: DevelopmentSite) {
     setSelected(site);
+    setListOpen(true);
     mapInstanceRef.current?.flyTo([site.lat, site.lng], 17, { duration: 0.8 });
   }
 
