@@ -79,7 +79,7 @@ export default function Page() {
         const marker = L.marker([site.lat, site.lng], { icon }).addTo(map);
         marker.on("click", () => {
           setSelected(site);
-          setListOpen(false);
+          setListOpen(true);
         });
         markersRef.current[site.id] = marker;
       });
