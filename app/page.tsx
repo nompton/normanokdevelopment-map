@@ -43,6 +43,8 @@ export default function Page() {
   const [baseMap, setBaseMap] = useState<"street" | "aerial">("street");
   const [showParcels, setShowParcels] = useState(false);
   const [parcelLoading, setParcelLoading] = useState(false);
+  const [showGrid, setShowGrid] = useState(false);
+  const gridLayerRef = useRef<any>(null);
 
   // ── MAP INIT ──────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -115,6 +117,21 @@ export default function Page() {
     });
     if (selected && !activeFilters.has(selected.status)) setSelected(null);
   }, [activeFilters, selected]);
+
+  // ── PLSS GRID OVERLAY ────────────────────────────────────────────────────
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    const L = (window as any).L;
+    if (!map || !L) return;
+    if (showGrid) {
+      gridLayerRef.current = L.tileLayer(
+        "https://gis.blm.gov/arcgis/rest/services/Cadastral/BLM_Natl_PLSS_CadNSDI/MapServer/tile/{z}/{y}/{x}",
+        { attribution: "BLM PLSS", maxZoom: 19, opacity: 0.55 }
+      ).addTo(map);
+    } else {
+      if (gridLayerRef.current) { map.removeLayer(gridLayerRef.current); gridLayerRef.current = null; }
+    }
+  }, [showGrid]);
 
   // ── INVALIDATE MAP SIZE WHEN SIDEBAR OPENS/CLOSES ────────────────────────
   useEffect(() => {
@@ -232,14 +249,15 @@ export default function Page() {
       {/* ── HEADER ── */}
       <header className="shrink-0 z-50" style={{ background: BRAND }}>
         <div className="px-4 py-3 flex items-center justify-between gap-2">
-          <a href="https://normanokdevelopment.com" target="_blank" rel="noopener noreferrer"
+          <button
+            onClick={() => { setSelected(null); setListOpen(true); mapInstanceRef.current?.setView([35.2226, -97.4395], 13); }}
             className="flex items-center gap-2.5 hover:opacity-85 transition-opacity min-w-0">
             <img src="/icon.png" alt="ND" className="h-7 w-7 object-contain rounded shrink-0" />
             <div className="min-w-0">
               <div className="text-white font-bold text-sm leading-tight tracking-tight truncate">Norman Development</div>
               <div className="text-white/60 text-[10px] tracking-wide uppercase hidden sm:block">Development Map</div>
             </div>
-          </a>
+          </button>
 
           <div className="flex items-center gap-1.5 shrink-0">
             {/* Map/Aerial */}
@@ -259,6 +277,16 @@ export default function Page() {
               {parcelLoading ? <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin inline-block" /> : null}
               Parcels
             </button>
+            {/* Grid */}
+            <button onClick={() => setShowGrid(!showGrid)}
+              className={`rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors ${showGrid ? "bg-white text-black border-white" : "border-white/30 bg-white/10 text-white hover:bg-white/20"}`}>
+              Grid
+            </button>
+            {/* ND site */}
+            <a href="https://normanokdevelopment.com" target="_blank" rel="noopener noreferrer"
+              className="hidden sm:block rounded-lg border border-white/30 bg-white/10 hover:bg-white/20 px-2.5 py-1.5 text-xs font-medium text-white transition-colors">
+              ND Site ↗
+            </a>
             {/* List toggle (desktop) */}
             <button onClick={() => setListOpen(!listOpen)}
               className="hidden md:block rounded-lg border border-white/30 bg-white/10 hover:bg-white/20 px-2.5 py-1.5 text-xs font-medium text-white transition-colors">
@@ -371,13 +399,19 @@ export default function Page() {
           <span className="text-[10px] font-medium">{baseMap === "aerial" ? "Street" : "Aerial"}</span>
         </button>
         <button onClick={() => setShowParcels(!showParcels)}
-          className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg transition-colors"
+          className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg transition-colors"
           style={{ color: showParcels ? BRAND : undefined }}>
           <span className="text-lg">🗺</span>
           <span className="text-[10px] font-medium">Parcels</span>
         </button>
+        <button onClick={() => setShowGrid(!showGrid)}
+          className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg transition-colors"
+          style={{ color: showGrid ? BRAND : undefined }}>
+          <span className="text-lg">⊞</span>
+          <span className="text-[10px] font-medium">Grid</span>
+        </button>
         <a href="https://normanokdevelopment.com" target="_blank" rel="noopener noreferrer"
-          className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg text-black/50">
+          className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg text-black/50">
           <span className="text-lg">↗</span>
           <span className="text-[10px] font-medium">ND Site</span>
         </a>
