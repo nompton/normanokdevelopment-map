@@ -275,27 +275,20 @@ export default function Page() {
         {listOpen && (
           <aside className="hidden md:flex w-80 shrink-0 border-r border-black/10 bg-white flex-col overflow-hidden z-40">
             {selected ? (
-              <>
+              <div className="flex flex-col h-full overflow-y-auto">
+                <button
+                  onClick={() => setSelected(null)}
+                  className="flex items-center gap-2 px-4 py-3 border-b border-black/10 text-sm font-medium hover:bg-black/[0.03] transition-colors shrink-0 text-left w-full"
+                  style={{ color: BRAND }}
+                >
+                  <span className="text-base">←</span> All sites
+                </button>
                 <SiteDetail
                   site={selected}
                   onClose={() => setSelected(null)}
                   onPdf={() => setPdfOpen(true)}
-                  showBack
                 />
-                <div className="border-t border-black/10 flex-1 overflow-hidden flex flex-col">
-                  <SiteList
-                    filteredSites={filteredSites}
-                    allSites={SITES}
-                    activeFilters={activeFilters}
-                    search={search}
-                    selected={selected}
-                    onSearch={setSearch}
-                    onToggleFilter={toggleFilter}
-                    onToggleAll={() => setActiveFilters(prev => prev.size === ALL_STATUSES.length ? new Set() : new Set(ALL_STATUSES))}
-                    onSelect={flyTo}
-                  />
-                </div>
-              </>
+              </div>
             ) : (
               <SiteList
                 filteredSites={filteredSites}
