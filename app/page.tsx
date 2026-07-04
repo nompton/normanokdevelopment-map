@@ -297,7 +297,8 @@ export default function Page() {
       </header>
 
       {/* ── BODY ── */}
-      <div className="flex flex-1 overflow-hidden relative">
+      {/* Desktop: row layout. Mobile: column layout (map on top, sheet below) */}
+      <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
 
         {/* Desktop sidebar */}
         {listOpen && (
@@ -333,53 +334,50 @@ export default function Page() {
           </aside>
         )}
 
-        {/* MAP */}
-        <div className="relative flex-1">
+        {/* MAP — takes remaining space; on mobile shrinks to leave room for sheet */}
+        <div className="relative flex-1 min-h-0">
           <div ref={mapRef} className="w-full h-full" />
         </div>
 
-        {/* Mobile bottom sheet — list or detail */}
+        {/* Mobile bottom sheet — sits BELOW map, no backdrop, pins fully tappable */}
         {listOpen && (
-          <div className="md:hidden absolute inset-0 z-30 flex flex-col justify-end">
-            <div className="absolute inset-0 bg-black/30" onClick={() => setListOpen(false)} />
-            <div className="relative bg-white rounded-t-2xl flex flex-col overflow-hidden" style={{ maxHeight: "55vh" }}>
-              {selected ? (
-                <>
-                  <div className="flex items-center gap-2 px-4 py-3 border-b border-black/10 shrink-0">
-                    <button onClick={() => setSelected(null)}
-                      className="flex items-center gap-1 text-xs font-medium hover:opacity-70 transition-opacity"
-                      style={{ color: BRAND }}>
-                      ← Back
-                    </button>
-                  </div>
-                  <div className="flex-1 overflow-y-auto">
-                    <SiteDetail
-                      site={selected}
-                      onClose={() => setSelected(null)}
-                      onPdf={() => setPdfOpen(true)}
-                    />
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-black/10 shrink-0">
-                    <span className="text-sm font-semibold">Development Sites</span>
-                    <button onClick={() => setListOpen(false)} className="text-black/40 text-lg w-8 h-8 flex items-center justify-center">✕</button>
-                  </div>
-                  <SiteList
-                    filteredSites={filteredSites}
-                    allSites={SITES}
-                    activeFilters={activeFilters}
-                    search={search}
-                    selected={selected}
-                    onSearch={setSearch}
-                    onToggleFilter={toggleFilter}
-                    onToggleAll={() => setActiveFilters(prev => prev.size === ALL_STATUSES.length ? new Set() : new Set(ALL_STATUSES))}
-                    onSelect={flyTo}
+          <div className="md:hidden shrink-0 bg-white border-t border-black/10 flex flex-col overflow-hidden" style={{ height: "45vh" }}>
+            {selected ? (
+              <>
+                <div className="flex items-center gap-2 px-4 py-3 border-b border-black/10 shrink-0">
+                  <button onClick={() => setSelected(null)}
+                    className="flex items-center gap-1 text-sm font-medium"
+                    style={{ color: BRAND }}>
+                    ← All sites
+                  </button>
+                </div>
+                <div className="flex-1 overflow-y-auto">
+                  <SiteDetail
+                    site={selected}
+                    onClose={() => setSelected(null)}
+                    onPdf={() => setPdfOpen(true)}
                   />
-                </>
-              )}
-            </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center justify-between px-4 py-3 border-b border-black/10 shrink-0">
+                  <span className="text-sm font-semibold">Development Sites</span>
+                  <button onClick={() => setListOpen(false)} className="text-black/40 text-lg w-8 h-8 flex items-center justify-center">✕</button>
+                </div>
+                <SiteList
+                  filteredSites={filteredSites}
+                  allSites={SITES}
+                  activeFilters={activeFilters}
+                  search={search}
+                  selected={selected}
+                  onSearch={setSearch}
+                  onToggleFilter={toggleFilter}
+                  onToggleAll={() => setActiveFilters(prev => prev.size === ALL_STATUSES.length ? new Set() : new Set(ALL_STATUSES))}
+                  onSelect={flyTo}
+                />
+              </>
+            )}
           </div>
         )}
       </div>
