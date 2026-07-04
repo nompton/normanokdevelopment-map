@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { SITES, DevelopmentSite, SiteStatus } from "../data/sites";
 
 const BRAND = "#3a8a6e";
+const GRID_URL = "https://thegridre.com";
 
 const STATUS_CONFIG: Record<SiteStatus, { label: string; color: string; dot: string; tip: string }> = {
   proposed:             { label: "Proposed",           color: "bg-amber-50 text-amber-800 border-amber-200",        dot: "#f59e0b", tip: "Announced or rumored — no city filing yet" },
@@ -43,8 +44,6 @@ export default function Page() {
   const [baseMap, setBaseMap] = useState<"street" | "aerial">("street");
   const [showParcels, setShowParcels] = useState(false);
   const [parcelLoading, setParcelLoading] = useState(false);
-  const [showGrid, setShowGrid] = useState(false);
-  const gridLayerRef = useRef<any>(null);
 
   // ── MAP INIT ──────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -118,20 +117,6 @@ export default function Page() {
     if (selected && !activeFilters.has(selected.status)) setSelected(null);
   }, [activeFilters, selected]);
 
-  // ── PLSS GRID OVERLAY ────────────────────────────────────────────────────
-  useEffect(() => {
-    const map = mapInstanceRef.current;
-    const L = (window as any).L;
-    if (!map || !L) return;
-    if (showGrid) {
-      gridLayerRef.current = L.tileLayer(
-        "https://gis.blm.gov/arcgis/rest/services/Cadastral/BLM_Natl_PLSS_CadNSDI/MapServer/tile/{z}/{y}/{x}",
-        { attribution: "BLM PLSS", maxZoom: 19, opacity: 0.55 }
-      ).addTo(map);
-    } else {
-      if (gridLayerRef.current) { map.removeLayer(gridLayerRef.current); gridLayerRef.current = null; }
-    }
-  }, [showGrid]);
 
   // ── INVALIDATE MAP SIZE WHEN SIDEBAR OPENS/CLOSES ────────────────────────
   useEffect(() => {
@@ -277,11 +262,12 @@ export default function Page() {
               {parcelLoading ? <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin inline-block" /> : null}
               Parcels
             </button>
-            {/* Grid */}
-            <button onClick={() => setShowGrid(!showGrid)}
-              className={`rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors ${showGrid ? "bg-white text-black border-white" : "border-white/30 bg-white/10 text-white hover:bg-white/20"}`}>
-              Grid
-            </button>
+            {/* GRID Real Estate sponsor */}
+            <a href={GRID_URL} target="_blank" rel="noopener noreferrer"
+              className="hidden sm:flex items-center gap-1.5 rounded-lg border border-white/20 bg-white/10 hover:bg-white/20 px-2.5 py-1.5 transition-colors group">
+              <span className="text-white/50 text-[10px] font-medium uppercase tracking-wide leading-none">Presented by</span>
+              <span className="text-white font-bold text-xs tracking-wide leading-none">GRID</span>
+            </a>
             {/* ND site */}
             <a href="https://normanokdevelopment.com" target="_blank" rel="noopener noreferrer"
               className="hidden sm:block rounded-lg border border-white/30 bg-white/10 hover:bg-white/20 px-2.5 py-1.5 text-xs font-medium text-white transition-colors">
@@ -402,12 +388,11 @@ export default function Page() {
           <span className="text-lg">🗺</span>
           <span className="text-[10px] font-medium">Parcels</span>
         </button>
-        <button onClick={() => setShowGrid(!showGrid)}
-          className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg transition-colors"
-          style={{ color: showGrid ? BRAND : undefined }}>
-          <span className="text-lg">⊞</span>
-          <span className="text-[10px] font-medium">Grid</span>
-        </button>
+        <a href={GRID_URL} target="_blank" rel="noopener noreferrer"
+          className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg">
+          <span className="text-[10px] font-bold tracking-wide" style={{ color: BRAND }}>GRID</span>
+          <span className="text-[9px] text-black/40 font-medium leading-tight">Real Estate</span>
+        </a>
         <a href="https://normanokdevelopment.com" target="_blank" rel="noopener noreferrer"
           className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg text-black/50">
           <span className="text-lg">↗</span>
@@ -565,6 +550,16 @@ function SiteList({ filteredSites, allSites, activeFilters, search, selected, on
             </button>
           );
         })}
+        {/* GRID Real Estate sponsorship footer */}
+        <a href={GRID_URL} target="_blank" rel="noopener noreferrer"
+          className="flex items-center justify-between px-4 py-4 border-t border-black/10 mt-2 hover:bg-black/[0.02] transition-colors group">
+          <div>
+            <div className="text-[9px] uppercase tracking-widest text-black/30 font-medium">Presented by</div>
+            <div className="text-sm font-bold tracking-wide mt-0.5" style={{ color: BRAND }}>GRID Real Estate</div>
+            <div className="text-[10px] text-black/40 mt-0.5">Norman, OK</div>
+          </div>
+          <span className="text-black/20 group-hover:text-black/40 transition-colors text-lg">↗</span>
+        </a>
       </div>
     </div>
   );
