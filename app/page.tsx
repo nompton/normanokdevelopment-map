@@ -229,7 +229,7 @@ export default function Page() {
   const sans = { fontFamily: "Arial, Helvetica, sans-serif" };
 
   return (
-    <div className="flex flex-col h-screen bg-white overflow-hidden" style={sans}>
+    <div className="flex flex-col bg-white overflow-hidden" style={{ ...sans, height: "100dvh" }}>
 
       {/* ── HEADER ── */}
       <header className="shrink-0 z-50" style={{ background: BRAND }}>
