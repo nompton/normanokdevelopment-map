@@ -256,17 +256,13 @@ export default function Page() {
               {parcelLoading && <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin inline-block" />}
               Parcels
             </button>
-            <button onClick={() => setShowGrid(!showGrid)}
-              className={`hidden sm:block rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors ${showGrid ? "bg-white text-black border-white" : "border-white/30 bg-white/10 text-white hover:bg-white/20"}`}>
-              Grid
-            </button>
             <a href={GRID_URL} target="_blank" rel="noopener noreferrer"
               className="hidden sm:flex items-center rounded-lg border border-white/20 bg-white/10 hover:bg-white/20 px-3 py-1.5 transition-opacity opacity-80 hover:opacity-100">
               <img src="/grid-logo-white.png" alt="GRID Real Estate" className="h-5 object-contain" />
             </a>
             <a href="https://normanokdevelopment.com" target="_blank" rel="noopener noreferrer"
-              className="hidden sm:block rounded-lg border border-white/30 bg-white/10 hover:bg-white/20 px-2.5 py-1.5 text-xs font-medium text-white transition-colors">
-              ND Site ↗
+              className="hidden sm:flex items-center rounded-lg border border-white/20 bg-white/10 hover:bg-white/20 px-3 py-1.5 transition-opacity opacity-80 hover:opacity-100">
+              <img src="/logo.png" alt="Norman Development" className="h-5 object-contain" />
             </a>
             <button onClick={() => setListOpen(!listOpen)}
               className="hidden md:block rounded-lg border border-white/30 bg-white/10 hover:bg-white/20 px-2.5 py-1.5 text-xs font-medium text-white transition-colors">
