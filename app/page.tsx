@@ -266,7 +266,7 @@ export default function Page() {
             </a>
             <button onClick={() => setListOpen(!listOpen)}
               className="hidden md:block rounded-lg border border-white/30 bg-white/10 hover:bg-white/20 px-2.5 py-1.5 text-xs font-medium text-white transition-colors">
-              {listOpen ? "Hide list" : "Sites"}
+              {listOpen ? "Hide List" : "List View"}
             </button>
           </div>
         </div>
