@@ -397,11 +397,11 @@ export default function Page() {
 
       {/* ── MOBILE BOTTOM BAR ── */}
       <div className="md:hidden shrink-0 border-t border-black/10 bg-white z-40" style={{ fontFamily: "Arial, Helvetica, sans-serif" }}>
-        {/* Floating Sites pill — sits above the bar */}
-        <div className="flex justify-center -mt-5 mb-1">
+        {/* Floating Sites pill — fixed above the bar */}
+        <div className="flex justify-center pt-2 pb-1">
           <button
             onClick={() => setMobileMode(mobileMode === "list" ? "map" : "list")}
-            className="flex items-center gap-2 px-5 py-2 rounded-full shadow-lg text-sm font-semibold transition-colors"
+            className="flex items-center gap-2 px-5 py-2 rounded-full shadow-lg text-sm font-semibold"
             style={{ background: BRAND, color: "white" }}
           >
             ☰ Sites
