@@ -39,6 +39,8 @@ export default function Page() {
   const [selected, setSelected] = useState<DevelopmentSite | null>(null);
   const [pdfOpen, setPdfOpen] = useState(false);
   const [listOpen, setListOpen] = useState(true);
+  // Mobile sheet mode: "list" = expanded ~70vh, "map" = collapsed, sheet hidden
+  const [mobileMode, setMobileMode] = useState<"list" | "map">("list");
   const [activeFilters, setActiveFilters] = useState<Set<SiteStatus>>(new Set(ALL_STATUSES));
   const [search, setSearch] = useState("");
   const [baseMap, setBaseMap] = useState<"street" | "aerial">("street");
@@ -80,7 +82,7 @@ export default function Page() {
         const marker = L.marker([site.lat, site.lng], { icon }).addTo(map);
         marker.on("click", () => {
           setSelected(site);
-          setListOpen(true);
+          setMobileMode("map"); // show detail with full map visible
         });
         markersRef.current[site.id] = marker;
       });
@@ -284,7 +286,7 @@ export default function Page() {
 
       {/* ── BODY ── */}
       {/* Desktop: row layout. Mobile: column layout (map on top, sheet below) */}
-      <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
+      <div className="flex flex-col md:flex-row flex-1 overflow-hidden relative">
 
         {/* Desktop sidebar */}
         {listOpen && (
@@ -325,44 +327,78 @@ export default function Page() {
           <div ref={mapRef} className="w-full h-full" />
         </div>
 
-        {/* Mobile bottom sheet — sits BELOW map, no backdrop, pins fully tappable */}
-        {listOpen && (
-          <div className="md:hidden shrink-0 bg-white border-t border-black/10 flex flex-col overflow-hidden" style={{ height: "45vh" }}>
+        {/* Mobile sheet — "list" mode: 70vh scrollable list. "map" mode: hidden, detail floats over map */}
+        {mobileMode === "list" && (
+          <div className="md:hidden shrink-0 bg-white border-t border-black/10 flex flex-col overflow-hidden" style={{ height: "70vh" }}>
+            {/* Drag handle */}
+            <div className="flex items-center justify-between px-4 pt-3 pb-2 shrink-0">
+              <span className="text-sm font-semibold">Development Sites</span>
+              <button
+                onClick={() => setMobileMode("map")}
+                className="flex items-center gap-1 rounded-lg border border-black/15 px-2.5 py-1 text-xs font-medium text-black/60"
+              >
+                Map ↑
+              </button>
+            </div>
+            <div className="flex-1 overflow-hidden flex flex-col">
+              <SiteList
+                filteredSites={filteredSites}
+                allSites={SITES}
+                activeFilters={activeFilters}
+                search={search}
+                selected={selected}
+                onSearch={setSearch}
+                onToggleFilter={toggleFilter}
+                onToggleAll={() => setActiveFilters(prev => prev.size === ALL_STATUSES.length ? new Set() : new Set(ALL_STATUSES))}
+                onSelect={(site) => { flyTo(site); setMobileMode("map"); }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Map mode: detail card floats at bottom, pins tappable, "List" button visible */}
+        {mobileMode === "map" && (
+          <div className="md:hidden pointer-events-none absolute bottom-16 left-0 right-0 px-3 z-20">
             {selected ? (
-              <>
-                <div className="flex items-center gap-2 px-4 py-3 border-b border-black/10 shrink-0">
-                  <button onClick={() => setSelected(null)}
-                    className="flex items-center gap-1 text-sm font-medium"
-                    style={{ color: BRAND }}>
-                    ← All sites
-                  </button>
+              <div className="pointer-events-auto bg-white rounded-2xl shadow-xl border border-black/10 overflow-hidden">
+                <div className="h-1 w-full" style={{ background: BRAND }} />
+                <div className="flex items-center gap-2 px-4 pt-3 pb-1">
+                  <button
+                    onClick={() => { setSelected(null); setMobileMode("list"); }}
+                    className="text-xs font-medium"
+                    style={{ color: BRAND }}
+                  >← List</button>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-bold truncate">{selected.name}</div>
+                    <div className="text-[10px] text-black/40 truncate">{selected.address}</div>
+                  </div>
+                  <StatusBadge status={selected.status} />
                 </div>
-                <div className="flex-1 overflow-y-auto">
-                  <SiteDetail
-                    site={selected}
-                    onClose={() => setSelected(null)}
-                    onPdf={() => setPdfOpen(true)}
-                  />
+                {selected.articles.length > 0 && (
+                  <div className="px-4 pb-1">
+                    {selected.articles.slice(0, 2).map((a) => (
+                      <a key={a.url} href={a.url} target="_blank" rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-xs py-0.5 hover:underline"
+                        style={{ color: BRAND }}>
+                        <span className="font-bold shrink-0">↗</span>
+                        <span className="truncate">{a.title}</span>
+                      </a>
+                    ))}
+                  </div>
+                )}
+                <div className="px-4 pb-3 pt-1">
+                  <p className="text-xs text-neutral-600 leading-4 line-clamp-2">{selected.description}</p>
                 </div>
-              </>
+              </div>
             ) : (
-              <>
-                <div className="flex items-center justify-between px-4 py-3 border-b border-black/10 shrink-0">
-                  <span className="text-sm font-semibold">Development Sites</span>
-                  <button onClick={() => setListOpen(false)} className="text-black/40 text-lg w-8 h-8 flex items-center justify-center">✕</button>
-                </div>
-                <SiteList
-                  filteredSites={filteredSites}
-                  allSites={SITES}
-                  activeFilters={activeFilters}
-                  search={search}
-                  selected={selected}
-                  onSearch={setSearch}
-                  onToggleFilter={toggleFilter}
-                  onToggleAll={() => setActiveFilters(prev => prev.size === ALL_STATUSES.length ? new Set() : new Set(ALL_STATUSES))}
-                  onSelect={flyTo}
-                />
-              </>
+              <div className="pointer-events-auto flex justify-center">
+                <button
+                  onClick={() => setMobileMode("list")}
+                  className="bg-white rounded-full shadow-lg border border-black/10 px-4 py-2 text-sm font-semibold flex items-center gap-2"
+                >
+                  <span>☰</span> View sites list
+                </button>
+              </div>
             )}
           </div>
         )}
@@ -370,9 +406,9 @@ export default function Page() {
 
       {/* ── MOBILE BOTTOM BAR ── */}
       <div className="md:hidden shrink-0 border-t border-black/10 bg-white flex items-center justify-around px-4 py-2 z-40">
-        <button onClick={() => setListOpen(!listOpen)}
+        <button onClick={() => setMobileMode(mobileMode === "list" ? "map" : "list")}
           className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg transition-colors"
-          style={{ color: listOpen ? BRAND : undefined }}>
+          style={{ color: mobileMode === "list" ? BRAND : undefined }}>
           <span className="text-lg">☰</span>
           <span className="text-[10px] font-medium">Sites</span>
         </button>
