@@ -40,7 +40,7 @@ export default function Page() {
   const [pdfOpen, setPdfOpen] = useState(false);
   const [listOpen, setListOpen] = useState(true);
   // Mobile sheet mode: "list" = expanded ~70vh, "map" = collapsed, sheet hidden
-  const [mobileMode, setMobileMode] = useState<"list" | "map">("list");
+  const [mobileMode, setMobileMode] = useState<"list" | "map">("map");
   const [activeFilters, setActiveFilters] = useState<Set<SiteStatus>>(new Set(ALL_STATUSES));
   const [search, setSearch] = useState("");
   const [baseMap, setBaseMap] = useState<"street" | "aerial">("street");
