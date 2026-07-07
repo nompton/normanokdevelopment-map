@@ -390,16 +390,7 @@ export default function Page() {
                   <p className="text-xs text-neutral-600 leading-4 line-clamp-2">{selected.description}</p>
                 </div>
               </div>
-            ) : (
-              <div className="pointer-events-auto flex justify-center">
-                <button
-                  onClick={() => setMobileMode("list")}
-                  className="bg-white rounded-full shadow-lg border border-black/10 px-4 py-2 text-sm font-semibold flex items-center gap-2"
-                >
-                  <span>☰</span> View sites list
-                </button>
-              </div>
-            )}
+            ) : null}
           </div>
         )}
       </div>
