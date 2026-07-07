@@ -405,35 +405,30 @@ export default function Page() {
       </div>
 
       {/* ── MOBILE BOTTOM BAR ── */}
-      <div className="md:hidden shrink-0 border-t border-black/10 bg-white flex items-center justify-around px-4 py-2 z-40">
-        <button onClick={() => setMobileMode(mobileMode === "list" ? "map" : "list")}
-          className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg transition-colors"
-          style={{ color: mobileMode === "list" ? BRAND : undefined }}>
-          <span className="text-lg">☰</span>
-          <span className="text-[10px] font-medium">Sites</span>
-        </button>
-        <button onClick={() => setBaseMap(baseMap === "street" ? "aerial" : "street")}
-          className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg transition-colors"
-          style={{ color: baseMap === "aerial" ? BRAND : undefined }}>
-          <span className="text-lg">🛰</span>
-          <span className="text-[10px] font-medium">{baseMap === "aerial" ? "Street" : "Aerial"}</span>
-        </button>
-        <button onClick={() => setShowParcels(!showParcels)}
-          className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg transition-colors"
-          style={{ color: showParcels ? BRAND : undefined }}>
-          <span className="text-lg">🗺</span>
-          <span className="text-[10px] font-medium">Parcels</span>
-        </button>
-        <a href={GRID_URL} target="_blank" rel="noopener noreferrer"
-          className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg">
-          <span className="text-[10px] font-bold tracking-wide" style={{ color: BRAND }}>GRID</span>
-          <span className="text-[9px] text-black/40 font-medium leading-tight">Real Estate</span>
-        </a>
-        <a href="https://normanokdevelopment.com" target="_blank" rel="noopener noreferrer"
-          className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg text-black/50">
-          <span className="text-lg">↗</span>
-          <span className="text-[10px] font-medium">ND Site</span>
-        </a>
+      <div className="md:hidden shrink-0 border-t border-black/10 bg-white z-40" style={{ fontFamily: "Arial, Helvetica, sans-serif" }}>
+        {/* Floating Sites pill — sits above the bar */}
+        <div className="flex justify-center -mt-5 mb-1">
+          <button
+            onClick={() => setMobileMode(mobileMode === "list" ? "map" : "list")}
+            className="flex items-center gap-2 px-5 py-2 rounded-full shadow-lg text-sm font-semibold transition-colors"
+            style={{ background: BRAND, color: "white" }}
+          >
+            <span>{mobileMode === "list" ? "↓ Map" : "☰ Sites"}</span>
+          </button>
+        </div>
+        {/* Slim link bar */}
+        <div className="flex items-center justify-around px-6 pb-2">
+          <a href={GRID_URL} target="_blank" rel="noopener noreferrer"
+            className="flex flex-col items-center gap-0.5 py-1 px-4">
+            <span className="text-[11px] font-bold tracking-wide" style={{ color: BRAND }}>GRID</span>
+            <span className="text-[9px] text-black/40 font-medium">Real Estate</span>
+          </a>
+          <a href="https://normanokdevelopment.com" target="_blank" rel="noopener noreferrer"
+            className="flex flex-col items-center gap-0.5 py-1 px-4 text-black/50">
+            <span className="text-[11px] font-medium">Norman Development ↗</span>
+            <span className="text-[9px] text-black/30">normanokdevelopment.com</span>
+          </a>
+        </div>
       </div>
 
       {/* ── PDF MODAL ── */}
