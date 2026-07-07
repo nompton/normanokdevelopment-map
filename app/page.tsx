@@ -459,39 +459,52 @@ function SiteList({ filteredSites, allSites, activeFilters, search, selected, on
   onSelect: (s: DevelopmentSite) => void;
 }) {
   const sans = { fontFamily: "Arial, Helvetica, sans-serif" };
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const filtered = activeFilters.size < ALL_STATUSES.length;
+
   return (
     <div className="flex flex-col flex-1 overflow-hidden min-h-0" style={sans}>
-      <div className="px-3 pt-2 pb-2 shrink-0">
+      {/* Search + filter toggle row */}
+      <div className="px-3 pt-2 pb-2 flex gap-2 shrink-0">
         <input type="text" placeholder="Search sites…" value={search} onChange={e => onSearch(e.target.value)}
-          className="w-full rounded-lg border border-black/15 px-3 py-2 text-xs focus:outline-none"
+          className="flex-1 rounded-lg border border-black/15 px-3 py-2 text-xs focus:outline-none"
           onFocus={e => e.target.style.borderColor = BRAND}
           onBlur={e => e.target.style.borderColor = "rgba(0,0,0,0.15)"} />
+        <button
+          onClick={() => setFiltersOpen(f => !f)}
+          className={`shrink-0 flex items-center gap-1.5 rounded-lg border px-2.5 py-2 text-xs font-medium transition-colors ${filtersOpen ? "border-transparent text-white" : filtered ? "border-transparent text-white" : "border-black/15 text-black/50"}`}
+          style={filtersOpen || filtered ? { background: BRAND } : {}}>
+          {filtered && !filtersOpen && <span className="w-1.5 h-1.5 rounded-full bg-white/80" />}
+          Filter{filtered && !filtersOpen ? ` (${activeFilters.size})` : ""}
+        </button>
       </div>
-      <div className="px-3 pb-2 shrink-0">
-        <div className="flex items-center justify-between mb-1.5">
-          <span className="text-[10px] font-semibold uppercase tracking-widest text-black/40">Filter</span>
+
+      {/* Collapsible filters */}
+      {filtersOpen && (
+        <div className="px-3 pb-2 shrink-0">
+          <div className="grid grid-cols-2 gap-1 mb-1.5">
+            {ALL_STATUSES.map(status => {
+              const cfg = STATUS_CONFIG[status];
+              const count = allSites.filter(s => s.status === status).length;
+              const active = activeFilters.has(status);
+              return (
+                <button key={status} onClick={() => onToggleFilter(status)} title={cfg.tip}
+                  className={`flex items-center justify-between rounded-lg px-2 py-1.5 text-xs border transition-all ${active ? "border-black/15 bg-white" : "border-transparent bg-black/[0.02] opacity-40"}`}>
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full" style={{ background: cfg.dot }} />
+                    <span className="font-medium truncate">{cfg.label}</span>
+                  </span>
+                  <span className="text-black/40 tabular-nums ml-1">{count}</span>
+                </button>
+              );
+            })}
+          </div>
           <button onClick={onToggleAll} className="text-[10px] font-medium hover:opacity-70" style={{ color: BRAND }}>
             {activeFilters.size === ALL_STATUSES.length ? "clear all" : "select all"}
           </button>
         </div>
-        <div className="grid grid-cols-2 gap-1">
-          {ALL_STATUSES.map(status => {
-            const cfg = STATUS_CONFIG[status];
-            const count = allSites.filter(s => s.status === status).length;
-            const active = activeFilters.has(status);
-            return (
-              <button key={status} onClick={() => onToggleFilter(status)} title={cfg.tip}
-                className={`flex items-center justify-between rounded-lg px-2 py-1.5 text-xs border transition-all ${active ? "border-black/15 bg-white" : "border-transparent bg-black/[0.02] opacity-40"}`}>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full" style={{ background: cfg.dot }} />
-                  <span className="font-medium truncate">{cfg.label}</span>
-                </span>
-                <span className="text-black/40 tabular-nums ml-1">{count}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      )}
+
       <div className="px-4 py-1.5 border-y border-black/5 shrink-0">
         <span className="text-[10px] font-semibold uppercase tracking-widest text-black/40">
           {filteredSites.length} of {allSites.length} sites
