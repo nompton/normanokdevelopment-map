@@ -127,7 +127,7 @@ export default function Page() {
     // Small delay so the DOM has finished resizing before we remeasure
     const t = setTimeout(() => map.invalidateSize(), 50);
     return () => clearTimeout(t);
-  }, [listOpen]);
+  }, [listOpen, mobileMode]);
 
   // ── BASE LAYER TOGGLE ─────────────────────────────────────────────────────
   useEffect(() => {
