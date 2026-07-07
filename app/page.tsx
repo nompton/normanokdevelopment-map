@@ -261,9 +261,8 @@ export default function Page() {
               Grid
             </button>
             <a href={GRID_URL} target="_blank" rel="noopener noreferrer"
-              className="hidden sm:flex items-center gap-1.5 rounded-lg border border-white/20 bg-white/10 hover:bg-white/20 px-2.5 py-1.5 transition-colors">
-              <span className="text-white/50 text-[10px] font-medium uppercase tracking-wide">Presented by</span>
-              <span className="text-white font-bold text-xs tracking-wide">GRID</span>
+              className="hidden sm:flex items-center rounded-lg border border-white/20 bg-white/10 hover:bg-white/20 px-3 py-1.5 transition-opacity opacity-80 hover:opacity-100">
+              <img src="/grid-logo-white.png" alt="GRID Real Estate" className="h-5 object-contain" />
             </a>
             <a href="https://normanokdevelopment.com" target="_blank" rel="noopener noreferrer"
               className="hidden sm:block rounded-lg border border-white/30 bg-white/10 hover:bg-white/20 px-2.5 py-1.5 text-xs font-medium text-white transition-colors">
