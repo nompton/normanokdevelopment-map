@@ -413,15 +413,18 @@ export default function Page() {
             className="flex items-center gap-2 px-5 py-2 rounded-full shadow-lg text-sm font-semibold transition-colors"
             style={{ background: BRAND, color: "white" }}
           >
-            <span>{mobileMode === "list" ? "↓ Map" : "☰ Sites"}</span>
+            ☰ Sites
           </button>
         </div>
         {/* Slim link bar */}
         <div className="flex items-center justify-around px-6 pb-2">
           <a href={GRID_URL} target="_blank" rel="noopener noreferrer"
-            className="flex flex-col items-center gap-0.5 py-1 px-4">
-            <span className="text-[11px] font-bold tracking-wide" style={{ color: BRAND }}>GRID</span>
-            <span className="text-[9px] text-black/40 font-medium">Real Estate</span>
+            className="flex items-center gap-2 py-1 px-4 opacity-70 hover:opacity-100 transition-opacity">
+            <img src="/grid-icon.svg" alt="GRID Real Estate" className="h-6 w-6 object-contain" />
+            <div>
+              <div className="text-[11px] font-bold tracking-wide leading-tight">GRID</div>
+              <div className="text-[9px] text-black/50 leading-tight">Real Estate</div>
+            </div>
           </a>
           <a href="https://normanokdevelopment.com" target="_blank" rel="noopener noreferrer"
             className="flex flex-col items-center gap-0.5 py-1 px-4 text-black/50">
