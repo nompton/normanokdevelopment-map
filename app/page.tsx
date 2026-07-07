@@ -358,7 +358,7 @@ export default function Page() {
 
         {/* Map mode: detail card floats at bottom, pins tappable, "List" button visible */}
         {mobileMode === "map" && (
-          <div className="md:hidden pointer-events-none absolute bottom-16 left-0 right-0 px-3 z-20">
+          <div className="md:hidden pointer-events-none fixed bottom-16 left-0 right-0 px-3 z-[2000]">
             {selected ? (
               <div className="pointer-events-auto bg-white rounded-2xl shadow-xl border border-black/10 overflow-hidden">
                 <div className="h-1 w-full" style={{ background: BRAND }} />
