@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { SITES, DevelopmentSite, SiteStatus } from "../data/sites";
+import { SITES as BUNDLED_SITES, DevelopmentSite, SiteStatus } from "../data/sites";
 
 const BRAND = "#3a8a6e";
 const GRID_URL = "https://thegridre.com";
@@ -47,6 +47,24 @@ export default function Page() {
   const [showParcels, setShowParcels] = useState(false);
   const [parcelLoading, setParcelLoading] = useState(false);
   const [showGrid, setShowGrid]     = useState(false);
+  const [SITES, setSITES]           = useState<DevelopmentSite[]>(BUNDLED_SITES);
+  const [mapReady, setMapReady]     = useState(false);
+
+  // ── LIVE DATA ─────────────────────────────────────────────────────────────
+  // Pull sites from the news-site backend so they can be managed from one admin.
+  // Falls back to the bundled data/sites.ts list if the API is unreachable.
+  useEffect(() => {
+    let cancelled = false;
+    const url = process.env.NEXT_PUBLIC_SITES_API || "https://normanokdevelopment.com/api/sites";
+    fetch(url, { cache: "no-store" })
+      .then(r => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then(data => {
+        const list = Array.isArray(data) ? data : data?.sites;
+        if (!cancelled && Array.isArray(list) && list.length) setSITES(list);
+      })
+      .catch(() => { /* keep bundled fallback */ });
+    return () => { cancelled = true; };
+  }, []);
 
   // ── MAP INIT ──────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -71,20 +89,7 @@ export default function Page() {
         { attribution: "Tiles © Esri", maxZoom: 19 }
       );
 
-      SITES.forEach((site) => {
-        const cfg = STATUS_CONFIG[site.status];
-        const icon = L.divIcon({
-          className: "",
-          html: `<div style="width:14px;height:14px;background:${cfg.dot};border:2.5px solid white;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>`,
-          iconSize: [14, 14], iconAnchor: [7, 7],
-        });
-        const marker = L.marker([site.lat, site.lng], { icon }).addTo(map);
-        marker.on("click", () => {
-          setSelected(site);
-          setSheet("detail");
-        });
-        markersRef.current[site.id] = marker;
-      });
+      setMapReady(true);
     }
 
     if (!document.querySelector("#leaflet-css")) {
@@ -107,6 +112,27 @@ export default function Page() {
     return () => { mapInstanceRef.current?.remove(); mapInstanceRef.current = null; };
   }, []);
 
+  // ── BUILD / REBUILD MARKERS (runs once the map is ready, and whenever the
+  //    live SITES list loads or changes) ──────────────────────────────────────
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    const L = (window as any).L;
+    if (!mapReady || !map || !L) return;
+    Object.values(markersRef.current).forEach((m: any) => m.remove());
+    markersRef.current = {};
+    SITES.forEach((site) => {
+      const cfg = STATUS_CONFIG[site.status];
+      const icon = L.divIcon({
+        className: "",
+        html: `<div style="width:14px;height:14px;background:${cfg.dot};border:2.5px solid white;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>`,
+        iconSize: [14, 14], iconAnchor: [7, 7],
+      });
+      const marker = L.marker([site.lat, site.lng], { icon }).addTo(map);
+      marker.on("click", () => { setSelected(site); setSheet("detail"); });
+      markersRef.current[site.id] = marker;
+    });
+  }, [mapReady, SITES]);
+
   // ── INVALIDATE SIZE ───────────────────────────────────────────────────────
   useEffect(() => {
     const t = setTimeout(() => mapInstanceRef.current?.invalidateSize(), 80);
@@ -122,7 +148,7 @@ export default function Page() {
       activeFilters.has(site.status) ? m.addTo(mapInstanceRef.current) : m.remove();
     });
     if (selected && !activeFilters.has(selected.status)) setSelected(null);
-  }, [activeFilters, selected]);
+  }, [activeFilters, selected, SITES, mapReady]);
 
   // ── BASE LAYER ────────────────────────────────────────────────────────────
   useEffect(() => {
