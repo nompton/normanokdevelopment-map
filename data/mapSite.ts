@@ -15,6 +15,9 @@ export interface MapSiteConfig {
   apiOrigin: string;     // where /api/sites lives (the news backend)
   center: [number, number];
   zoom: number;
+  brand: string;         // header + accent colour
+  logo: string;          // wordmark shown in the header
+  icon: string;          // square mark shown in the header
   // County parcel ArcGIS FeatureServer (layer 1). Omit to hide the parcel
   // overlay for cities we don't have a source for yet.
   parcelService?: string;
@@ -29,6 +32,9 @@ export const MAP_SITES: Record<MapSiteKey, MapSiteConfig> = {
     apiOrigin: "https://normanokdevelopment.com",
     center: [35.2226, -97.4395],
     zoom: 13,
+    brand: "#3a8a6e",
+    logo: "/logo.png",
+    icon: "/icon.png",
     parcelService:
       "https://services.arcgis.com/rt1leD4Hj3sLGHNL/arcgis/rest/services/Parcels/FeatureServer/1",
   },
@@ -40,6 +46,9 @@ export const MAP_SITES: Record<MapSiteKey, MapSiteConfig> = {
     apiOrigin: "https://bixbyokdevelopment.com",
     center: [35.942, -95.8833], // Bixby, OK
     zoom: 13,
+    brand: "#c8203a",
+    logo: "/logo-bixby.svg",
+    icon: "/icon-bixby.svg",
     // Bixby is in Tulsa County — drop the Tulsa County parcel FeatureServer URL
     // here to enable the parcel overlay. Hidden until then.
     parcelService: undefined,

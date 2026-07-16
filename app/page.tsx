@@ -4,7 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { SITES as BUNDLED_SITES, DevelopmentSite, SiteStatus } from "../data/sites";
 import { resolveMapSite } from "../data/mapSite";
 
-const BRAND = "#3a8a6e";
+// Module-level brand colour (used by SiteDetail/SiteList too). Resolved from the
+// build-time NEXT_PUBLIC_MAP_SITE; the header/center also re-resolve per render.
+const BRAND = resolveMapSite().brand;
 const GRID_URL = "https://thegridre.com";
 
 const STATUS_CONFIG: Record<SiteStatus, { label: string; color: string; dot: string; tip: string }> = {
@@ -265,7 +267,7 @@ export default function Page() {
           <button
             onClick={() => { setSelected(null); setSheet("hidden"); mapInstanceRef.current?.setView(SITE.center, SITE.zoom); }}
             className="flex items-center gap-2.5 hover:opacity-85 transition-opacity min-w-0">
-            <img src="/icon.png" alt="ND" className="h-7 w-7 object-contain rounded shrink-0" />
+            <img src={SITE.icon} alt="" className="h-7 w-7 object-contain rounded shrink-0" />
             <div className="min-w-0">
               <div className="text-white font-bold text-sm leading-tight tracking-tight">{SITE.name}</div>
               <div className="text-white/60 text-[10px] tracking-wide uppercase hidden sm:block">Development Map</div>
@@ -296,7 +298,7 @@ export default function Page() {
             </a>
             <a href={SITE.homeUrl} target="_blank" rel="noopener noreferrer"
               className="hidden sm:flex items-center rounded-lg border border-white/20 bg-white/10 hover:bg-white/20 px-3 py-1.5 transition-opacity opacity-80 hover:opacity-100">
-              <img src="/logo.png" alt={SITE.name} className="h-5 object-contain" />
+              <img src={SITE.logo} alt={SITE.name} className="h-5 object-contain" />
             </a>
             <button onClick={() => setListOpen(!listOpen)}
               className="hidden md:block rounded-lg border border-white/30 bg-white/10 hover:bg-white/20 px-2.5 py-1.5 text-xs font-medium text-white transition-colors">
