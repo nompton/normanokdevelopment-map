@@ -1,16 +1,32 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+// Per-city metadata, chosen at build time via NEXT_PUBLIC_MAP_SITE (defaults to
+// Norman). Keep in sync with data/mapSite.ts.
+const META = {
+  norman: {
+    name: "Norman Development",
+    place: "Norman, Oklahoma",
+    mapUrl: "https://map.normanokdevelopment.com",
+  },
+  bixby: {
+    name: "Bixby Development",
+    place: "Bixby, Oklahoma",
+    mapUrl: "https://map.bixbyokdevelopment.com",
+  },
+};
+
+const m = META[process.env.NEXT_PUBLIC_MAP_SITE === "bixby" ? "bixby" : "norman"];
+
 export const metadata: Metadata = {
-  title: "Norman Development Map — normanokdevelopment.com",
-  description:
-    "Interactive map of commercial and residential development projects across Norman, Oklahoma. Track proposed, planned, and under-construction projects with site plans and coverage from Norman Development.",
-  metadataBase: new URL("https://map.normanokdevelopment.com"),
+  title: `${m.name} Map — ${m.place}`,
+  description: `Interactive map of commercial and residential development projects across ${m.place}. Track proposed, planned, and under-construction projects with site plans and coverage from ${m.name}.`,
+  metadataBase: new URL(m.mapUrl),
   openGraph: {
-    title: "Norman Development Map",
-    description: "Track development projects across Norman, Oklahoma.",
-    url: "https://map.normanokdevelopment.com",
-    siteName: "Norman Development",
+    title: `${m.name} Map`,
+    description: `Track development projects across ${m.place}.`,
+    url: m.mapUrl,
+    siteName: m.name,
   },
 };
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { SITES as BUNDLED_SITES, DevelopmentSite, SiteStatus } from "../data/sites";
+import { resolveMapSite } from "../data/mapSite";
 
 const BRAND = "#3a8a6e";
 const GRID_URL = "https://thegridre.com";
@@ -26,9 +27,10 @@ function StatusBadge({ status }: { status: SiteStatus }) {
   );
 }
 
-const PARCEL_SERVICE = "https://services.arcgis.com/rt1leD4Hj3sLGHNL/arcgis/rest/services/Parcels/FeatureServer/1";
-
 export default function Page() {
+  // Which city's map is this? (build env or hostname)
+  const SITE = resolveMapSite();
+  const PARCEL_SERVICE = SITE.parcelService;
   const mapRef        = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const markersRef    = useRef<Record<string, any>>({});
@@ -47,7 +49,9 @@ export default function Page() {
   const [showParcels, setShowParcels] = useState(false);
   const [parcelLoading, setParcelLoading] = useState(false);
   const [showGrid, setShowGrid]     = useState(false);
-  const [SITES, setSITES]           = useState<DevelopmentSite[]>(BUNDLED_SITES);
+  // Bundled data/sites.ts is Norman-only, so only use it as an offline fallback
+  // for the Norman build; other cities start empty until the API answers.
+  const [SITES, setSITES]           = useState<DevelopmentSite[]>(SITE.key === "norman" ? BUNDLED_SITES : []);
   const [mapReady, setMapReady]     = useState(false);
 
   // ── LIVE DATA ─────────────────────────────────────────────────────────────
@@ -55,14 +59,16 @@ export default function Page() {
   // Falls back to the bundled data/sites.ts list if the API is unreachable.
   useEffect(() => {
     let cancelled = false;
-    const url = process.env.NEXT_PUBLIC_SITES_API || "https://normanokdevelopment.com/api/sites";
+    const url = process.env.NEXT_PUBLIC_SITES_API || `${SITE.apiOrigin}/api/sites`;
     fetch(url, { cache: "no-store" })
       .then(r => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
       .then(data => {
         const list = Array.isArray(data) ? data : data?.sites;
-        if (!cancelled && Array.isArray(list) && list.length) setSITES(list);
+        // Use the API result even when empty (a city with no sites yet); only a
+        // fetch error keeps the offline fallback.
+        if (!cancelled && Array.isArray(list)) setSITES(list);
       })
-      .catch(() => { /* keep bundled fallback */ });
+      .catch(() => { /* keep offline fallback */ });
     return () => { cancelled = true; };
   }, []);
 
@@ -72,7 +78,7 @@ export default function Page() {
 
     function initMap(L: any) {
       const map = L.map(mapRef.current!, { scrollWheelZoom: true, zoomControl: false })
-        .setView([35.2226, -97.4395], 13);
+        .setView(SITE.center, SITE.zoom);
       mapInstanceRef.current = map;
 
       L.control.zoom({ position: "bottomright" }).addTo(map);
@@ -257,11 +263,11 @@ export default function Page() {
       <header className="shrink-0 z-50" style={{ background: BRAND }}>
         <div className="px-4 py-3 flex items-center justify-between gap-2">
           <button
-            onClick={() => { setSelected(null); setSheet("hidden"); mapInstanceRef.current?.setView([35.2226, -97.4395], 13); }}
+            onClick={() => { setSelected(null); setSheet("hidden"); mapInstanceRef.current?.setView(SITE.center, SITE.zoom); }}
             className="flex items-center gap-2.5 hover:opacity-85 transition-opacity min-w-0">
             <img src="/icon.png" alt="ND" className="h-7 w-7 object-contain rounded shrink-0" />
             <div className="min-w-0">
-              <div className="text-white font-bold text-sm leading-tight tracking-tight">Norman Development</div>
+              <div className="text-white font-bold text-sm leading-tight tracking-tight">{SITE.name}</div>
               <div className="text-white/60 text-[10px] tracking-wide uppercase hidden sm:block">Development Map</div>
             </div>
           </button>
@@ -277,18 +283,20 @@ export default function Page() {
                 Aerial
               </button>
             </div>
-            <button onClick={() => setShowParcels(!showParcels)}
-              className={`rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors flex items-center gap-1 ${showParcels ? "bg-white text-black border-white" : "border-white/30 bg-white/10 text-white hover:bg-white/20"}`}>
-              {parcelLoading && <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin inline-block" />}
-              Parcels
-            </button>
+            {PARCEL_SERVICE && (
+              <button onClick={() => setShowParcels(!showParcels)}
+                className={`rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors flex items-center gap-1 ${showParcels ? "bg-white text-black border-white" : "border-white/30 bg-white/10 text-white hover:bg-white/20"}`}>
+                {parcelLoading && <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin inline-block" />}
+                Parcels
+              </button>
+            )}
             <a href={GRID_URL} target="_blank" rel="noopener noreferrer"
               className="hidden sm:flex items-center rounded-lg border border-white/20 bg-white/10 hover:bg-white/20 px-3 py-1.5 transition-opacity opacity-80 hover:opacity-100">
               <img src="/grid-logo-white.png" alt="GRID Real Estate" className="h-5 object-contain" />
             </a>
-            <a href="https://normanokdevelopment.com" target="_blank" rel="noopener noreferrer"
+            <a href={SITE.homeUrl} target="_blank" rel="noopener noreferrer"
               className="hidden sm:flex items-center rounded-lg border border-white/20 bg-white/10 hover:bg-white/20 px-3 py-1.5 transition-opacity opacity-80 hover:opacity-100">
-              <img src="/logo.png" alt="Norman Development" className="h-5 object-contain" />
+              <img src="/logo.png" alt={SITE.name} className="h-5 object-contain" />
             </a>
             <button onClick={() => setListOpen(!listOpen)}
               className="hidden md:block rounded-lg border border-white/30 bg-white/10 hover:bg-white/20 px-2.5 py-1.5 text-xs font-medium text-white transition-colors">
@@ -372,9 +380,9 @@ export default function Page() {
                     <img src="/grid-icon.svg" alt="GRID" className="h-5 w-5 object-contain" />
                     <div className="text-xs font-semibold leading-tight">GRID Real Estate</div>
                   </a>
-                  <a href="https://normanokdevelopment.com" target="_blank" rel="noopener noreferrer"
+                  <a href={SITE.homeUrl} target="_blank" rel="noopener noreferrer"
                     className="text-xs text-black/40 hover:text-black/70 transition-colors">
-                    normanokdevelopment.com ↗
+                    {SITE.homeLabel} ↗
                   </a>
                 </div>
               </>
