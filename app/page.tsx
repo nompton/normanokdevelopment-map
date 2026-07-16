@@ -411,7 +411,7 @@ export default function Page() {
               <button onClick={() => setPdfOpen(false)}
                 className="rounded-full w-8 h-8 flex items-center justify-center hover:bg-black/10 transition-colors text-black/60">✕</button>
             </div>
-            <iframe src={`/plans/${selected.planPdf}`} className="flex-1 w-full" title={`${selected.name} site plan`} />
+            <iframe src={/^https?:\/\//.test(selected.planPdf) ? selected.planPdf : `/plans/${selected.planPdf}`} className="flex-1 w-full" title={`${selected.name} site plan`} />
           </div>
         </div>
       )}
