@@ -5,7 +5,7 @@
 //   1. NEXT_PUBLIC_MAP_SITE at build time (cleanest for a static export — build
 //      one bundle per domain), else
 //   2. the request hostname at runtime (so a single deployment can serve both).
-export type MapSiteKey = "norman" | "bixby";
+export type MapSiteKey = "norman" | "bixby" | "noble";
 
 export interface MapSiteConfig {
   key: MapSiteKey;
@@ -53,13 +53,30 @@ export const MAP_SITES: Record<MapSiteKey, MapSiteConfig> = {
     // here to enable the parcel overlay. Hidden until then.
     parcelService: undefined,
   },
+  noble: {
+    key: "noble",
+    name: "Noble Development",
+    homeUrl: "https://nobleokdevelopment.com",
+    homeLabel: "nobleokdevelopment.com",
+    apiOrigin: "https://nobleokdevelopment.com",
+    center: [35.1387, -97.3939], // Noble, OK
+    zoom: 14,
+    brand: "#1e5fbf",
+    logo: "/logo-noble.svg",
+    icon: "/icon-noble.svg",
+    // Noble is in Cleveland County — same parcel FeatureServer as Norman.
+    parcelService:
+      "https://services.arcgis.com/rt1leD4Hj3sLGHNL/arcgis/rest/services/Parcels/FeatureServer/1",
+  },
 };
 
 export function resolveMapSite(): MapSiteConfig {
   const override = process.env.NEXT_PUBLIC_MAP_SITE as MapSiteKey | undefined;
   if (override && MAP_SITES[override]) return MAP_SITES[override];
-  if (typeof window !== "undefined" && /bixby/i.test(window.location.hostname)) {
-    return MAP_SITES.bixby;
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname;
+    if (/bixby/i.test(host)) return MAP_SITES.bixby;
+    if (/noble/i.test(host)) return MAP_SITES.noble;
   }
   return MAP_SITES.norman;
 }

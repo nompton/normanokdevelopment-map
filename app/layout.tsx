@@ -14,9 +14,15 @@ const META = {
     place: "Bixby, Oklahoma",
     mapUrl: "https://map.bixbyokdevelopment.com",
   },
+  noble: {
+    name: "Noble Development",
+    place: "Noble, Oklahoma",
+    mapUrl: "https://map.nobleokdevelopment.com",
+  },
 };
 
-const m = META[process.env.NEXT_PUBLIC_MAP_SITE === "bixby" ? "bixby" : "norman"];
+const MAP_SITE = process.env.NEXT_PUBLIC_MAP_SITE as keyof typeof META | undefined;
+const m = (MAP_SITE && META[MAP_SITE]) || META.norman;
 
 export const metadata: Metadata = {
   title: `${m.name} Map — ${m.place}`,

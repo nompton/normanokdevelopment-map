@@ -5,6 +5,7 @@
 const META = {
   norman: { name: 'Norman Development', place: 'Norman, Oklahoma', url: 'https://map.normanokdevelopment.com' },
   bixby: { name: 'Bixby Development', place: 'Bixby, Oklahoma', url: 'https://map.bixbyokdevelopment.com' },
+  noble: { name: 'Noble Development', place: 'Noble, Oklahoma', url: 'https://map.nobleokdevelopment.com' },
 }
 const setAttr = (attr, value) => ({ element(el) { el.setAttribute(attr, value) } })
 
@@ -13,7 +14,7 @@ export async function onRequest(context) {
   if (!(res.headers.get('content-type') || '').includes('text/html')) return res
 
   const host = new URL(context.request.url).hostname.toLowerCase()
-  const m = /bixby/i.test(host) ? META.bixby : META.norman
+  const m = /bixby/i.test(host) ? META.bixby : /noble/i.test(host) ? META.noble : META.norman
   const title = `${m.name} Map — ${m.place}`
   const desc = `Interactive map of commercial and residential development projects across ${m.place}. Track proposed, planned, and under-construction projects with site plans and coverage from ${m.name}.`
   const ogDesc = `Track development projects across ${m.place}.`

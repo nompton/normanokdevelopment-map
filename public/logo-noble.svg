@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 1664 710" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,-7875.728787,0)">
+        <g id="Artboard2" transform="matrix(0.854857,0,0,1.288692,6794.847927,-367.723024)">
+            <rect x="1264.399" y="285.346" width="1945.891" height="550.566" style="fill:none;"/>
+            <g transform="matrix(2.175129,0,0,1.425956,1172.190038,-152.09483)">
+                <path d="M914.82,388.092C914.82,355.514 888.682,329.065 856.486,329.065L121.188,329.065C88.993,329.065 62.854,355.514 62.854,388.092L62.854,611.551C62.854,644.129 88.993,670.578 121.188,670.578L856.486,670.578C888.682,670.578 914.82,644.129 914.82,611.551L914.82,388.092Z" style="fill:rgb(30,95,191);"/>
+                <path d="M928.265,388.092L928.265,611.551C928.265,651.638 896.102,684.183 856.486,684.183L121.188,684.183C81.572,684.183 49.409,651.638 49.409,611.551L49.409,388.092C49.409,348.006 81.572,315.461 121.188,315.461L856.486,315.461C896.102,315.461 928.265,348.006 928.265,388.092ZM914.82,388.092C914.82,355.514 888.682,329.065 856.486,329.065L121.188,329.065C88.993,329.065 62.854,355.514 62.854,388.092L62.854,611.551C62.854,644.129 88.993,670.578 121.188,670.578L856.486,670.578C888.682,670.578 914.82,644.129 914.82,611.551L914.82,388.092Z" style="fill:white;"/>
+            </g>
+            <g transform="matrix(1.213433,0,0,0.804934,1206.458244,209.043428)">
+                <g transform="matrix(184.85021,0,0,184.85021,1496.44728,670.019116)">
+                </g>
+                <text x="196.087px" y="670.019px" style="font-family:'Roboto-Black', 'Roboto';font-weight:900;font-size:184.85px;fill:white;">DEVEL<tspan x="739.175px " y="670.019px ">O</tspan>PMEN<tspan x="1379.833px " y="670.019px ">T</tspan></text>
+            </g>
+            <g transform="matrix(1.612612,0,0,1.06973,-11571.613292,907.587789)">
+                <g transform="matrix(315.342976,0,0,315.342976,9051.899375,-273.93053)">
+                </g>
+                <text x="8061.833px" y="-273.931px" style="font-family:'Roboto-Black', 'Roboto';font-weight:900;font-size:315.343px;fill:white;">NOBLE</text>
+            </g>
+        </g>
+    </g>
+</svg>
