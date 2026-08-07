@@ -562,6 +562,72 @@ function SiteList({ filteredSites, allSites, activeFilters, search, selected, on
           );
         })}
       </div>
+      <NewsletterSignup />
+    </div>
+  );
+}
+
+// ── NEWSLETTER SIGNUP ───────────────────────────────────────────────────────
+// Inline subscribe box, pinned to the bottom of the list. Posts to the news
+// backend's newsletter API (cross-origin — that endpoint sends CORS headers).
+function NewsletterSignup() {
+  const SITE = resolveMapSite();
+  const [email, setEmail] = useState("");
+  const [state, setState] = useState<"idle" | "sending" | "done" | "error">("idle");
+  const [error, setError] = useState("");
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setState("sending");
+    try {
+      const res = await fetch(`${SITE.apiOrigin}/api/newsletter/subscribe`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || "failed");
+      }
+      setState("done");
+      setEmail("");
+    } catch (err: any) {
+      setState("error");
+      setError(err?.message?.includes("valid") ? "Please enter a valid email." : "Something went wrong. Try again.");
+    }
+  }
+
+  return (
+    <div className="shrink-0 border-t border-black/10 px-4 py-3 bg-black/[0.015]" style={{ fontFamily: "Arial, Helvetica, sans-serif" }}>
+      <div className="text-[10px] font-semibold uppercase tracking-widest text-black/40 mb-1.5">Newsletter</div>
+      {state === "done" ? (
+        <p className="text-xs text-black/60">Thanks for subscribing — we&apos;ll keep you posted on {SITE.name} news.</p>
+      ) : (
+        <>
+          <p className="text-xs text-black/50 mb-2 leading-snug">Get the latest {SITE.name} news in your inbox.</p>
+          <form onSubmit={submit} className="flex gap-1.5">
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              placeholder="you@email.com"
+              className="flex-1 min-w-0 rounded-lg border border-black/15 px-2.5 py-1.5 text-xs focus:outline-none"
+              onFocus={e => (e.target.style.borderColor = BRAND)}
+              onBlur={e => (e.target.style.borderColor = "rgba(0,0,0,0.15)")}
+            />
+            <button
+              type="submit"
+              disabled={state === "sending"}
+              className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+              style={{ background: BRAND }}>
+              {state === "sending" ? "…" : "Subscribe"}
+            </button>
+          </form>
+          {error && <p className="mt-1 text-[11px] text-red-600">{error}</p>}
+        </>
+      )}
     </div>
   );
 }
