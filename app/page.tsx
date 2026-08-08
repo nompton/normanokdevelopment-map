@@ -15,6 +15,7 @@ const STATUS_CONFIG: Record<SiteStatus, { label: string; color: string; dot: str
   "under-construction": { label: "Under Construction",  color: "bg-orange-50 text-orange-800 border-orange-200",     dot: "#f97316", tip: "Actively being built" },
   completed:            { label: "Completed",           color: "bg-emerald-50 text-emerald-800 border-emerald-200",  dot: "#3a8a6e", tip: "Open / finished" },
   cancelled:            { label: "Cancelled",           color: "bg-neutral-100 text-neutral-500 border-neutral-200", dot: "#9ca3af", tip: "Officially withdrawn or abandoned" },
+  "no-plans":           { label: "No Active Plans",     color: "bg-violet-50 text-violet-800 border-violet-200",     dot: "#8b5cf6", tip: "Vacant/known site with nothing filed yet" },
 };
 
 const ALL_STATUSES = Object.keys(STATUS_CONFIG) as SiteStatus[];

@@ -6,6 +6,7 @@
 //   "under-construction" — actively being built
 //   "completed"          — open / finished
 //   "cancelled"          — officially withdrawn or abandoned
+//   "no-plans"           — vacant/known site with nothing filed yet (people ask)
 //
 // planPdf: filename inside /public/plans/ — e.g. "sooner-mall-dicks.pdf"
 //          Leave as undefined if you don't have a plan yet.
@@ -15,7 +16,7 @@
 // lat/lng: right-click any location in Google Maps → "What's here?" for coordinates
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type SiteStatus = "proposed" | "planned" | "under-construction" | "completed" | "cancelled";
+export type SiteStatus = "proposed" | "planned" | "under-construction" | "completed" | "cancelled" | "no-plans";
 
 export interface Article {
   title: string;
