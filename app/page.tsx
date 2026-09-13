@@ -56,24 +56,27 @@ export default function Page() {
   // for the Norman build; other cities start empty until the API answers.
   const [SITES, setSITES]           = useState<DevelopmentSite[]>(SITE.key === "norman" ? BUNDLED_SITES : []);
   const [mapReady, setMapReady]     = useState(false);
+  const [dataState, setDataState]   = useState<"loading" | "ok" | "error">("loading");
 
   // ── LIVE DATA ─────────────────────────────────────────────────────────────
   // Pull sites from the news-site backend so they can be managed from one admin.
-  // Falls back to the bundled data/sites.ts list if the API is unreachable.
-  useEffect(() => {
-    let cancelled = false;
+  // Track loading/error so a blank map can explain itself (e.g. the backend being
+  // unreachable) and offer a retry, instead of silently showing zero projects.
+  const loadSites = () => {
+    setDataState("loading");
     const url = process.env.NEXT_PUBLIC_SITES_API || `${SITE.apiOrigin}/api/sites`;
     fetch(url, { cache: "no-store" })
       .then(r => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
       .then(data => {
         const list = Array.isArray(data) ? data : data?.sites;
-        // Use the API result even when empty (a city with no sites yet); only a
-        // fetch error keeps the offline fallback.
-        if (!cancelled && Array.isArray(list)) setSITES(list);
+        // Use the API result even when empty (a city with no sites yet).
+        if (Array.isArray(list)) setSITES(list);
+        setDataState("ok");
       })
-      .catch(() => { /* keep offline fallback */ });
-    return () => { cancelled = true; };
-  }, []);
+      .catch(() => setDataState("error"));
+  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { loadSites(); }, []);
 
   // ── MAP INIT ──────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -331,6 +334,7 @@ export default function Page() {
                 onSearch={setSearch} onToggleFilter={toggleFilter}
                 onToggleAll={() => setActiveFilters(p => p.size === ALL_STATUSES.length ? new Set() : new Set(ALL_STATUSES))}
                 onSelect={flyTo}
+                dataState={dataState} onRetry={loadSites}
               />
             )}
           </aside>
@@ -374,6 +378,7 @@ export default function Page() {
                     onSearch={setSearch} onToggleFilter={toggleFilter}
                     onToggleAll={() => setActiveFilters(p => p.size === ALL_STATUSES.length ? new Set() : new Set(ALL_STATUSES))}
                     onSelect={(site) => { flyTo(site); setSheet("detail"); }}
+                    dataState={dataState} onRetry={loadSites}
                   />
                 </div>
                 {/* Sponsor footer inside sheet */}
@@ -479,7 +484,7 @@ function SiteDetail({ site, onClose, onPdf }: { site: DevelopmentSite; onClose: 
 }
 
 // ── SITE LIST ─────────────────────────────────────────────────────────────────
-function SiteList({ filteredSites, allSites, activeFilters, search, selected, onSearch, onToggleFilter, onToggleAll, onSelect }: {
+function SiteList({ filteredSites, allSites, activeFilters, search, selected, onSearch, onToggleFilter, onToggleAll, onSelect, dataState, onRetry }: {
   filteredSites: DevelopmentSite[];
   allSites: DevelopmentSite[];
   activeFilters: Set<SiteStatus>;
@@ -489,6 +494,8 @@ function SiteList({ filteredSites, allSites, activeFilters, search, selected, on
   onToggleFilter: (s: SiteStatus) => void;
   onToggleAll: () => void;
   onSelect: (s: DevelopmentSite) => void;
+  dataState: "loading" | "ok" | "error";
+  onRetry: () => void;
 }) {
   const sans = { fontFamily: "Arial, Helvetica, sans-serif" };
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -544,7 +551,16 @@ function SiteList({ filteredSites, allSites, activeFilters, search, selected, on
       </div>
       <div className="flex-1 overflow-y-auto min-h-0">
         {filteredSites.length === 0 && (
-          <div className="px-4 py-8 text-center text-xs text-black/40">No sites match your filters.</div>
+          allSites.length === 0 && dataState === "loading" ? (
+            <div className="px-4 py-8 text-center text-xs text-black/40">Loading development projects…</div>
+          ) : allSites.length === 0 && dataState === "error" ? (
+            <div className="px-4 py-8 text-center text-xs text-black/50">
+              Couldn&apos;t load development projects.{" "}
+              <button onClick={onRetry} className="font-semibold underline" style={{ color: BRAND }}>Retry</button>
+            </div>
+          ) : (
+            <div className="px-4 py-8 text-center text-xs text-black/40">No sites match your filters.</div>
+          )
         )}
         {filteredSites.map(site => {
           const cfg = STATUS_CONFIG[site.status];
