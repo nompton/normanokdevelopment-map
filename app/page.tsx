@@ -151,6 +151,32 @@ export default function Page() {
     return () => clearTimeout(t);
   }, [listOpen, sheet]);
 
+  // ── DEEP LINKING ──────────────────────────────────────────────────────────
+  // Keep ?site=<id> in the URL in sync with the current selection so a specific
+  // project is shareable/bookmarkable, and open it on first load if present.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const u = new URL(window.location.href);
+    if (selected) u.searchParams.set("site", selected.id);
+    else u.searchParams.delete("site");
+    window.history.replaceState(null, "", u.toString());
+  }, [selected]);
+
+  const deepLinkApplied = useRef(false);
+  useEffect(() => {
+    if (deepLinkApplied.current || SITES.length === 0) return;
+    const id = new URLSearchParams(window.location.search).get("site");
+    if (!id) { deepLinkApplied.current = true; return; }
+    const s = SITES.find(x => x.id === id);
+    if (s) {
+      deepLinkApplied.current = true;
+      setSelected(s);
+      setSheet("detail");
+      const fly = () => mapInstanceRef.current?.flyTo([s.lat, s.lng], 17, { duration: 0.8 });
+      mapReady ? fly() : setTimeout(fly, 400);
+    }
+  }, [SITES, mapReady]);
+
   // ── FILTER MARKERS ────────────────────────────────────────────────────────
   useEffect(() => {
     if (!mapInstanceRef.current) return;
@@ -264,6 +290,11 @@ export default function Page() {
 
   return (
     <div className="flex flex-col bg-white overflow-hidden" style={{ ...sans, height: "100dvh" }}>
+
+      {/* Crawlable/screen-reader page heading (the UI itself is a full-screen map) */}
+      <h1 className="sr-only">
+        {SITE.name} Map — commercial and residential development projects
+      </h1>
 
       {/* ── HEADER ── */}
       <header className="shrink-0 z-50" style={{ background: BRAND }}>

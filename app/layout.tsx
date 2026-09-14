@@ -34,6 +34,16 @@ export const metadata: Metadata = {
   title: `${m.name} Map — ${m.place}`,
   description: `Interactive map of commercial and residential development projects across ${m.place}. Track proposed, planned, and under-construction projects with site plans and coverage from ${m.name}.`,
   metadataBase: new URL(m.mapUrl),
+  // Canonical bakes to the default (Norman) build; the Pages middleware rewrites
+  // the href per hostname so each city map self-canonicalises (and the
+  // *.pages.dev preview points at the real custom domain).
+  alternates: { canonical: m.mapUrl },
+  robots: { index: true, follow: true, "max-image-preview": "large" } as Metadata["robots"],
+  applicationName: `${m.name} Map`,
+  keywords: [
+    `${m.place} development`, `${m.place} construction`, `${m.place} new businesses`,
+    `${m.place} real estate`, `${m.place} development map`, "commercial development", "residential development",
+  ],
   // Raster icons per city so the browser tab / search result shows the brand
   // mark instead of a generic globe.
   icons: { icon: [{ url: m.icon, type: "image/png" }], apple: m.icon, shortcut: m.icon },
