@@ -54,6 +54,7 @@ export default function Page() {
   const parcelLayerRef = useRef<any>(null);
   const gridLayerRef  = useRef<any>(null);
   const userMarkerRef = useRef<any>(null);
+  const clusterRef    = useRef<any>(null);
 
   const [selected, setSelected]     = useState<DevelopmentSite | null>(null);
   const [pdfOpen, setPdfOpen]       = useState(false);
@@ -115,26 +116,57 @@ export default function Page() {
         { attribution: "Tiles © Esri", maxZoom: 19 }
       );
 
+      // Cluster overlapping markers so dense areas (e.g. University North Park)
+      // read as one labelled bubble until you zoom in. Branded cluster icon;
+      // falls back to a plain layer group if the plugin didn't load.
+      clusterRef.current = L.markerClusterGroup
+        ? L.markerClusterGroup({
+            maxClusterRadius: 45,
+            showCoverageOnHover: false,
+            spiderfyOnMaxZoom: true,
+            disableClusteringAtZoom: 17,
+            iconCreateFunction: (cluster: any) => {
+              const n = cluster.getChildCount();
+              const size = n < 10 ? 32 : n < 50 ? 38 : 44;
+              return L.divIcon({
+                className: "",
+                html: `<div style="width:${size}px;height:${size}px;background:${BRAND};color:#fff;border:2.5px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;box-shadow:0 2px 6px rgba(0,0,0,.4);font-family:Arial,Helvetica,sans-serif">${n}</div>`,
+                iconSize: [size, size],
+              });
+            },
+          })
+        : L.layerGroup();
+      map.addLayer(clusterRef.current);
+
       setMapReady(true);
     }
 
-    if (!document.querySelector("#leaflet-css")) {
-      const link = Object.assign(document.createElement("link"), {
-        id: "leaflet-css", rel: "stylesheet",
-        href: "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
-      });
-      document.head.appendChild(link);
-    }
+    // Leaflet + MarkerCluster stylesheets.
+    ([
+      ["leaflet-css", "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"],
+      ["mcluster-css", "https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"],
+      ["mcluster-css-default", "https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"],
+    ] as const).forEach(([id, href]) => {
+      if (!document.querySelector(`#${id}`)) {
+        document.head.appendChild(Object.assign(document.createElement("link"), { id, rel: "stylesheet", href }));
+      }
+    });
 
-    const load = (cb: (L: any) => void) => {
-      if ((window as any).L) { cb((window as any).L); return; }
-      const s = Object.assign(document.createElement("script"), {
-        src: "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
-        onload: () => cb((window as any).L),
-      });
-      document.head.appendChild(s);
-    };
-    load(initMap);
+    const loadScript = (src: string) => new Promise<void>((resolve) => {
+      if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+      document.head.appendChild(Object.assign(document.createElement("script"), { src, onload: () => resolve() }));
+    });
+
+    (async () => {
+      const W = window as any;
+      if (!W.L) await loadScript("https://unpkg.com/leaflet@1.9.4/dist/leaflet.js");
+      // MarkerCluster augments the global L; load it before we init the map. If
+      // it fails, initMap still runs and falls back to an unclustered group.
+      if (W.L && !W.L.markerClusterGroup) {
+        await loadScript("https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js");
+      }
+      if (W.L) initMap(W.L);
+    })();
     return () => { mapInstanceRef.current?.remove(); mapInstanceRef.current = null; };
   }, []);
 
@@ -143,15 +175,17 @@ export default function Page() {
   useEffect(() => {
     const map = mapInstanceRef.current;
     const L = (window as any).L;
-    if (!mapReady || !map || !L) return;
-    Object.values(markersRef.current).forEach((m: any) => m.remove());
+    const cluster = clusterRef.current;
+    if (!mapReady || !map || !L || !cluster) return;
+    cluster.clearLayers();
     markersRef.current = {};
     SITES.forEach((site) => {
       const cfg = STATUS_CONFIG[site.status];
-      const marker = L.marker([site.lat, site.lng], { icon: markerIcon(L, cfg.dot, false), title: site.name }).addTo(map);
+      const marker = L.marker([site.lat, site.lng], { icon: markerIcon(L, cfg.dot, false), title: site.name });
       // Hover label so a dot is identifiable without opening it.
       marker.bindTooltip(site.name, { direction: "top", offset: [0, -8], opacity: 0.95 });
       marker.on("click", () => { setSelected(site); setSheet("detail"); });
+      cluster.addLayer(marker); // filter effect prunes to the active statuses
       markersRef.current[site.id] = marker;
     });
   }, [mapReady, SITES]);
@@ -214,12 +248,18 @@ export default function Page() {
   }, [selected]);
 
   // ── FILTER MARKERS ────────────────────────────────────────────────────────
+  // Add/remove from the cluster group (not the map) so filtered-out sites also
+  // drop out of the cluster counts.
   useEffect(() => {
-    if (!mapInstanceRef.current) return;
+    const cluster = clusterRef.current;
+    if (!cluster) return;
     SITES.forEach((site) => {
       const m = markersRef.current[site.id];
       if (!m) return;
-      activeFilters.has(site.status) ? m.addTo(mapInstanceRef.current) : m.remove();
+      const shown = activeFilters.has(site.status);
+      const inCluster = cluster.hasLayer(m);
+      if (shown && !inCluster) cluster.addLayer(m);
+      else if (!shown && inCluster) cluster.removeLayer(m);
     });
     if (selected && !activeFilters.has(selected.status)) setSelected(null);
   }, [activeFilters, selected, SITES, mapReady]);
