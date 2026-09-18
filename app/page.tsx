@@ -152,30 +152,40 @@ export default function Page() {
   }, [listOpen, sheet]);
 
   // ── DEEP LINKING ──────────────────────────────────────────────────────────
-  // Keep ?site=<id> in the URL in sync with the current selection so a specific
-  // project is shareable/bookmarkable, and open it on first load if present.
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const u = new URL(window.location.href);
-    if (selected) u.searchParams.set("site", selected.id);
-    else u.searchParams.delete("site");
-    window.history.replaceState(null, "", u.toString());
-  }, [selected]);
-
+  // Capture ?site=<id> at first render, BEFORE the URL-sync effect below can
+  // clear it (that race was silently dropping incoming deep links).
+  const initialSiteId = useRef(
+    typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("site") : null
+  );
   const deepLinkApplied = useRef(false);
+
+  // Open the deep-linked project once its data is available. Norman's sites are
+  // bundled and present on first render; other cities arrive from the API.
   useEffect(() => {
-    if (deepLinkApplied.current || SITES.length === 0) return;
-    const id = new URLSearchParams(window.location.search).get("site");
+    if (deepLinkApplied.current) return;
+    const id = initialSiteId.current;
     if (!id) { deepLinkApplied.current = true; return; }
+    if (SITES.length === 0) return; // wait for data
     const s = SITES.find(x => x.id === id);
+    deepLinkApplied.current = true;
     if (s) {
-      deepLinkApplied.current = true;
       setSelected(s);
       setSheet("detail");
       const fly = () => mapInstanceRef.current?.flyTo([s.lat, s.lng], 17, { duration: 0.8 });
       mapReady ? fly() : setTimeout(fly, 400);
     }
   }, [SITES, mapReady]);
+
+  // Keep ?site=<id> in sync with the selection so a project is shareable — but
+  // only after the initial deep link is resolved, so we never wipe the incoming
+  // ?site= before it can be applied.
+  useEffect(() => {
+    if (typeof window === "undefined" || !deepLinkApplied.current) return;
+    const u = new URL(window.location.href);
+    if (selected) u.searchParams.set("site", selected.id);
+    else u.searchParams.delete("site");
+    window.history.replaceState(null, "", u.toString());
+  }, [selected]);
 
   // ── FILTER MARKERS ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -469,6 +479,22 @@ export default function Page() {
 // ── SITE DETAIL ───────────────────────────────────────────────────────────────
 function SiteDetail({ site, onClose, onPdf }: { site: DevelopmentSite; onClose: () => void; onPdf: () => void }) {
   const sans = { fontFamily: "Arial, Helvetica, sans-serif" };
+  const [copied, setCopied] = useState(false);
+
+  async function copyLink() {
+    const url = typeof window !== "undefined"
+      ? `${window.location.origin}/?site=${encodeURIComponent(site.id)}`
+      : "";
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard blocked (e.g. insecure context) — select-and-prompt fallback.
+      window.prompt("Copy this link:", url);
+    }
+  }
+
   return (
     <div className="flex flex-col" style={sans}>
       <div className="h-1 w-full shrink-0" style={{ background: BRAND }} />
@@ -476,6 +502,17 @@ function SiteDetail({ site, onClose, onPdf }: { site: DevelopmentSite; onClose: 
         <StatusBadge status={site.status} />
         <h2 className="mt-2 text-base font-bold text-neutral-900 leading-snug">{site.name}</h2>
         <p className="mt-0.5 text-xs text-black/50">{site.address}</p>
+        <button
+          onClick={copyLink}
+          className="mt-2 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors hover:bg-black/[0.03]"
+          style={{ borderColor: `${BRAND}55`, color: BRAND }}
+          aria-live="polite">
+          {copied ? (
+            <><svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>Link copied</>
+          ) : (
+            <><svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1" /><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1" /></svg>Copy link</>
+          )}
+        </button>
       </div>
       <div className="px-4 pb-3">
         <p className="text-sm text-neutral-700 leading-5">{site.description}</p>
