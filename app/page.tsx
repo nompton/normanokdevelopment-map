@@ -20,6 +20,18 @@ const STATUS_CONFIG: Record<SiteStatus, { label: string; color: string; dot: str
 
 const ALL_STATUSES = Object.keys(STATUS_CONFIG) as SiteStatus[];
 
+// Marker glyph. The selected site gets a larger dot with a soft ring so it
+// stands out from the field and ties the list/detail selection to the map.
+function markerHtml(dot: string, selected: boolean): string {
+  return selected
+    ? `<div style="width:22px;height:22px;background:${dot};border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 4px ${dot}55,0 2px 6px rgba(0,0,0,.5)"></div>`
+    : `<div style="width:14px;height:14px;background:${dot};border:2.5px solid #fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>`;
+}
+function markerIcon(L: any, dot: string, selected: boolean) {
+  const s = selected ? 22 : 14, a = s / 2;
+  return L.divIcon({ className: "", html: markerHtml(dot, selected), iconSize: [s, s], iconAnchor: [a, a] });
+}
+
 function StatusBadge({ status }: { status: SiteStatus }) {
   const cfg = STATUS_CONFIG[status];
   return (
@@ -41,6 +53,7 @@ export default function Page() {
   const aerialLayerRef = useRef<any>(null);
   const parcelLayerRef = useRef<any>(null);
   const gridLayerRef  = useRef<any>(null);
+  const userMarkerRef = useRef<any>(null);
 
   const [selected, setSelected]     = useState<DevelopmentSite | null>(null);
   const [pdfOpen, setPdfOpen]       = useState(false);
@@ -57,6 +70,7 @@ export default function Page() {
   const [SITES, setSITES]           = useState<DevelopmentSite[]>(SITE.key === "norman" ? BUNDLED_SITES : []);
   const [mapReady, setMapReady]     = useState(false);
   const [dataState, setDataState]   = useState<"loading" | "ok" | "error">("loading");
+  const [locating, setLocating]     = useState(false);
 
   // ── LIVE DATA ─────────────────────────────────────────────────────────────
   // Pull sites from the news-site backend so they can be managed from one admin.
@@ -134,16 +148,28 @@ export default function Page() {
     markersRef.current = {};
     SITES.forEach((site) => {
       const cfg = STATUS_CONFIG[site.status];
-      const icon = L.divIcon({
-        className: "",
-        html: `<div style="width:14px;height:14px;background:${cfg.dot};border:2.5px solid white;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>`,
-        iconSize: [14, 14], iconAnchor: [7, 7],
-      });
-      const marker = L.marker([site.lat, site.lng], { icon }).addTo(map);
+      const marker = L.marker([site.lat, site.lng], { icon: markerIcon(L, cfg.dot, false), title: site.name }).addTo(map);
+      // Hover label so a dot is identifiable without opening it.
+      marker.bindTooltip(site.name, { direction: "top", offset: [0, -8], opacity: 0.95 });
       marker.on("click", () => { setSelected(site); setSheet("detail"); });
       markersRef.current[site.id] = marker;
     });
   }, [mapReady, SITES]);
+
+  // ── EMPHASISE THE SELECTED MARKER ─────────────────────────────────────────
+  // Kept separate from the build effect so changing selection just re-skins the
+  // affected markers instead of rebuilding the whole field.
+  useEffect(() => {
+    const L = (window as any).L;
+    if (!L) return;
+    SITES.forEach((site) => {
+      const m = markersRef.current[site.id];
+      if (!m) return;
+      const sel = selected?.id === site.id;
+      m.setIcon(markerIcon(L, STATUS_CONFIG[site.status].dot, sel));
+      m.setZIndexOffset(sel ? 1000 : 0);
+    });
+  }, [selected, SITES, mapReady]);
 
   // ── INVALIDATE SIZE ───────────────────────────────────────────────────────
   useEffect(() => {
@@ -285,6 +311,27 @@ export default function Page() {
     mapInstanceRef.current?.flyTo([site.lat, site.lng], 17, { duration: 0.8 });
   }
 
+  // Center the map on the visitor so they can see what's developing near them.
+  function locateMe() {
+    const map = mapInstanceRef.current;
+    const L = (window as any).L;
+    if (!map || !L || typeof navigator === "undefined" || !navigator.geolocation) return;
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLocating(false);
+        const { latitude, longitude } = pos.coords;
+        if (userMarkerRef.current) userMarkerRef.current.remove();
+        userMarkerRef.current = L.circleMarker([latitude, longitude], {
+          radius: 8, color: "#ffffff", weight: 3, fillColor: "#2563eb", fillOpacity: 1,
+        }).addTo(map).bindTooltip("You are here", { direction: "top", offset: [0, -8] });
+        map.flyTo([latitude, longitude], 15, { duration: 0.8 });
+      },
+      () => setLocating(false), // permission denied / unavailable — silently no-op
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+    );
+  }
+
   function toggleFilter(s: SiteStatus) {
     setActiveFilters(prev => { const n = new Set(prev); n.has(s) ? n.delete(s) : n.add(s); return n; });
   }
@@ -384,6 +431,22 @@ export default function Page() {
         {/* Map — always fills remaining space */}
         <div className="relative flex-1 min-h-0">
           <div ref={mapRef} className="w-full h-full" />
+
+          {/* Locate me — center on the visitor */}
+          <button
+            onClick={locateMe}
+            disabled={locating}
+            aria-label="Show my location"
+            title="Show my location"
+            className="absolute top-3 right-3 z-[1000] flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white shadow-md transition-colors hover:bg-neutral-50 disabled:opacity-60">
+            {locating ? (
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-neutral-400 border-t-transparent" />
+            ) : (
+              <svg viewBox="0 0 24 24" className="h-5 w-5" style={{ color: BRAND }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="3.5" /><path d="M12 2v3.5M12 18.5V22M2 12h3.5M18.5 12H22" />
+              </svg>
+            )}
+          </button>
 
           {/* Mobile: floating Sites button — only when sheet is hidden */}
           {!sheetOpen && (
