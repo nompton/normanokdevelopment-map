@@ -441,7 +441,7 @@ export default function Page() {
       </header>
 
       {/* ── BODY ── */}
-      <div className="flex flex-row flex-1 overflow-hidden">
+      <main className="flex flex-row flex-1 overflow-hidden">
 
         {/* Desktop sidebar */}
         {listOpen && (
@@ -560,7 +560,7 @@ export default function Page() {
             )}
           </div>
         </div>
-      </div>
+      </main>
 
       {/* ── PDF MODAL ── */}
       {pdfOpen && selected?.planPdf && (
