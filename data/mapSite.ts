@@ -10,6 +10,7 @@ export type MapSiteKey = "norman" | "bixby" | "noble";
 export interface MapSiteConfig {
   key: MapSiteKey;
   name: string;          // "Norman Development"
+  place: string;         // "Norman, Oklahoma" — used in the page title/description
   homeUrl: string;       // news site
   homeLabel: string;     // display text for the link
   apiOrigin: string;     // where /api/sites lives (the news backend)
@@ -27,6 +28,7 @@ export const MAP_SITES: Record<MapSiteKey, MapSiteConfig> = {
   norman: {
     key: "norman",
     name: "Norman Development",
+    place: "Norman, Oklahoma",
     homeUrl: "https://normanokdevelopment.com",
     homeLabel: "normanokdevelopment.com",
     apiOrigin: "https://normanokdevelopment.com",
@@ -41,6 +43,7 @@ export const MAP_SITES: Record<MapSiteKey, MapSiteConfig> = {
   bixby: {
     key: "bixby",
     name: "Bixby Development",
+    place: "Bixby, Oklahoma",
     homeUrl: "https://bixbyokdevelopment.com",
     homeLabel: "bixbyokdevelopment.com",
     apiOrigin: "https://bixbyokdevelopment.com",
@@ -56,6 +59,7 @@ export const MAP_SITES: Record<MapSiteKey, MapSiteConfig> = {
   noble: {
     key: "noble",
     name: "Noble Development",
+    place: "Noble, Oklahoma",
     homeUrl: "https://nobleokdevelopment.com",
     homeLabel: "nobleokdevelopment.com",
     apiOrigin: "https://nobleokdevelopment.com",

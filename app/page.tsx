@@ -93,6 +93,16 @@ export default function Page() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { loadSites(); }, []);
 
+  // The static export bakes Norman's <title>/description; the Pages middleware
+  // rewrites them per host, but Next re-applies the build-time (Norman) metadata
+  // on hydration. Re-assert the resolved city's title/description on the client
+  // so Bixby/Noble tabs don't read "Norman Development Map".
+  useEffect(() => {
+    document.title = `${SITE.name} Map — ${SITE.place}`;
+    const desc = document.querySelector('meta[name="description"]');
+    if (desc) desc.setAttribute("content", `Interactive map of commercial and residential development projects across ${SITE.place}. Track proposed, planned, and under-construction projects with site plans and coverage from ${SITE.name}.`);
+  }, [SITE.key]);
+
   // ── MAP INIT ──────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
