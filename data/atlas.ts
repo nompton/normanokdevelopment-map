@@ -94,13 +94,16 @@ export function leadSignal(p: Parcel): Lead | null {
 // A pin links to its story via article URLs (post_id isn't populated). Parse the
 // story slug from the first article on the news site's own domain.
 export function slugFromArticles(articles: { url?: string }[] | undefined, newsOrigin: string): string | null {
+  let host = "";
+  try { host = new URL(newsOrigin).hostname.replace(/^www\./, ""); } catch { host = ""; }
   for (const a of articles || []) {
-    const u = a?.url || "";
-    if (!u.startsWith(newsOrigin)) continue;
     try {
-      const seg = new URL(u).pathname.replace(/\/+$/, "").split("/").filter(Boolean).pop();
+      const url = new URL(a?.url || "");
+      // Match by hostname, ignoring www (article links use www.*, homeUrl doesn't).
+      if (host && url.hostname.replace(/^www\./, "") !== host) continue;
+      const seg = url.pathname.replace(/\/+$/, "").split("/").filter(Boolean).pop();
       if (seg) return seg;
-    } catch { /* skip */ }
+    } catch { /* skip non-URLs */ }
   }
   return null;
 }
