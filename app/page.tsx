@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { SITES as BUNDLED_SITES, DevelopmentSite, SiteStatus } from "../data/sites";
 import { resolveMapSite } from "../data/mapSite";
+import { fetchParcels, slugFromArticles, leadSignal, usd, num, fmtMonth, Parcel } from "../data/atlas";
 
 // Module-level brand colour (used by SiteDetail/SiteList too). Resolved from the
 // build-time NEXT_PUBLIC_MAP_SITE; the header/center also re-resolve per render.
@@ -590,6 +591,64 @@ export default function Page() {
 }
 
 // ── SITE DETAIL ───────────────────────────────────────────────────────────────
+// The property signal + key assessor facts behind a pin, from ATLAS (GRID Real
+// Estate). Keyed off the pin's tied story (parsed from its article links).
+// Renders nothing when the pin has no story or ATLAS has no parcel for it.
+function ParcelFacts({ site }: { site: DevelopmentSite }) {
+  const SITE = resolveMapSite();
+  const [parcels, setParcels] = useState<Parcel[] | null>(null);
+  useEffect(() => {
+    const slug = slugFromArticles(site.articles, SITE.homeUrl);
+    if (!slug) { setParcels([]); return; }
+    let alive = true;
+    setParcels(null);
+    fetchParcels(slug, SITE.key).then((ps) => { if (alive) setParcels(ps); });
+    return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [site.id]);
+
+  if (!parcels || parcels.length === 0) return null;
+  const p = parcels[0];
+  const lead = leadSignal(p);
+  const toneStyle =
+    lead?.tone === "amber" ? { borderColor: "#fcd34d", background: "#fffbeb", color: "#92400e" }
+    : lead?.tone === "green" ? { borderColor: `${BRAND}55`, background: `${BRAND}14`, color: BRAND }
+    : { borderColor: "rgba(0,0,0,0.1)", background: "rgba(0,0,0,0.02)", color: "#374151" };
+  const facts: [string, string | null][] = [
+    ["Owner", p.owner ? `${p.owner}${p.investorOwned ? " · investor" : ""}` : null],
+    ["Last sale", p.salePrice ? `${usd(p.salePrice)}${p.saleDate ? " · " + fmtMonth(p.saleDate) : ""}` : null],
+    ["Building", p.sqft ? `${num(p.sqft)} sq ft` : null],
+    ["Assessed", usd(p.marketValue)],
+  ];
+  const shown = facts.filter(([, v]) => v);
+
+  return (
+    <div className="px-4 pb-3">
+      <div className="text-[10px] font-semibold uppercase tracking-widest text-black/40 mb-2">Property</div>
+      {lead && (
+        <div className="mb-2 flex items-start gap-2 rounded-lg border px-3 py-2" style={toneStyle}>
+          <span aria-hidden="true" className="text-sm leading-5">{lead.icon}</span>
+          <div className="min-w-0">
+            <div className="text-xs font-bold leading-snug">{lead.label}</div>
+            {lead.detail && <div className="text-[10px] opacity-80">{lead.detail}</div>}
+          </div>
+        </div>
+      )}
+      {shown.length > 0 && (
+        <dl className="space-y-1">
+          {shown.map(([k, v]) => (
+            <div key={k} className="flex justify-between gap-3 text-xs">
+              <dt className="text-black/45">{k}</dt>
+              <dd className="text-right font-medium text-neutral-800">{v}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
+      <div className="mt-1.5 text-[10px] text-black/35">Parcel data via GRID Real Estate</div>
+    </div>
+  );
+}
+
 function SiteDetail({ site, onClose, onPdf }: { site: DevelopmentSite; onClose: () => void; onPdf: () => void }) {
   const sans = { fontFamily: "Arial, Helvetica, sans-serif" };
   const [copied, setCopied] = useState(false);
@@ -630,6 +689,7 @@ function SiteDetail({ site, onClose, onPdf }: { site: DevelopmentSite; onClose: 
       <div className="px-4 pb-3">
         <p className="text-sm text-neutral-700 leading-5">{site.description}</p>
       </div>
+      <ParcelFacts site={site} />
       {site.articles.length > 0 && (
         <div className="px-4 pb-3">
           <div className="text-[10px] font-semibold uppercase tracking-widest text-black/40 mb-2">Coverage</div>
