@@ -28,6 +28,26 @@ function siteFor(host) {
   return /bixby/i.test(host) ? META.bixby : /noble/i.test(host) ? META.noble : META.norman
 }
 
+const STATUS_LABEL = {
+  'proposed': 'Proposed', 'planned': 'Planned', 'under-construction': 'Under construction',
+  'completed': 'Completed', 'cancelled': 'Cancelled', 'no-plans': 'No active plans',
+}
+
+// Fetch this host's development sites from the news backend, with a short timeout
+// and edge caching, so one slow/unreachable API never hangs a map page load.
+// Returns [] on any failure (callers fall back to the generic map meta).
+async function fetchSites(m) {
+  try {
+    const ctrl = new AbortController()
+    const t = setTimeout(() => ctrl.abort(), 3000)
+    const r = await fetch(`${m.home}/api/sites`, { signal: ctrl.signal, cf: { cacheTtl: 300, cacheEverything: true } })
+    clearTimeout(t)
+    if (!r.ok) return []
+    const data = await r.json()
+    return Array.isArray(data) ? data : (data.sites || [])
+  } catch { return [] }
+}
+
 export async function onRequest(context) {
   const url = new URL(context.request.url)
   const host = url.hostname.toLowerCase()
@@ -47,11 +67,17 @@ export async function onRequest(context) {
     return new Response(body, { headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'public, max-age=86400' } })
   }
 
-  // ── sitemap.xml (per host) — the map is a single indexable page ─────────────
+  // ── sitemap.xml (per host) — the map home plus each development's deep link ──
   if (url.pathname === '/sitemap.xml') {
+    const sites = isPreview ? [] : await fetchSites(m)
+    const siteUrls = sites
+      .filter(s => s && s.id)
+      .map(s => `<url><loc>${esc(`${m.url}/?site=${encodeURIComponent(s.id)}`)}</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>`)
+      .join('')
     const body = `<?xml version="1.0" encoding="UTF-8"?>\n` +
       `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">` +
       `<url><loc>${m.url}/</loc><changefreq>daily</changefreq><priority>0.8</priority></url>` +
+      siteUrls +
       `</urlset>`
     return new Response(body, { headers: { 'content-type': 'application/xml; charset=utf-8', 'cache-control': 'public, max-age=3600' } })
   }
@@ -60,9 +86,23 @@ export async function onRequest(context) {
   // Only rewrite HTML documents; static assets (icons, logos) pass through.
   if (!(res.headers.get('content-type') || '').includes('text/html')) return res
 
-  const title = `${m.name} Map — ${m.place}`
-  const desc = `Interactive map of commercial and residential development projects across ${m.place}. Track proposed, planned, and under-construction projects with site plans and coverage from ${m.name}.`
-  const ogDesc = `Track development projects across ${m.place}.`
+  // When a deep link (?site=<id>) is shared, render that development's own
+  // title/description/OG so social cards and search show the real project — not
+  // the generic map. Falls back to the generic map on any miss or fetch failure.
+  const siteId = url.searchParams.get('site')
+  const proj = (siteId && !isPreview)
+    ? (await fetchSites(m)).find(s => s && String(s.id) === String(siteId)) || null
+    : null
+
+  const mapDesc = `Interactive map of commercial and residential development projects across ${m.place}. Track proposed, planned, and under-construction projects with site plans and coverage from ${m.name}.`
+  const projDesc = proj ? String(proj.description || '').replace(/\s+/g, ' ').trim() : ''
+  const title = proj ? `${proj.name} — ${m.name} Map` : `${m.name} Map — ${m.place}`
+  const ogTitle = proj ? `${proj.name} — ${m.name} Map` : `${m.name} Map`
+  const desc = proj
+    ? `${proj.name}${proj.address ? ` · ${proj.address}` : ''} — ${STATUS_LABEL[proj.status] || 'Development'} in ${m.place}.${projDesc ? ' ' + projDesc : ''}`.slice(0, 300)
+    : mapDesc
+  const ogDesc = proj ? (projDesc.slice(0, 200) || `Track development projects across ${m.place}.`) : `Track development projects across ${m.place}.`
+  const canonical = proj ? `${m.url}/?site=${encodeURIComponent(proj.id)}` : m.url
 
   // Structured data: a WebApplication (the map tool) published by the local news
   // Organization, plus the geographic area it serves. Helps Google understand
@@ -76,7 +116,7 @@ export async function onRequest(context) {
     operatingSystem: 'Web',
     browserRequirements: 'Requires JavaScript.',
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-    description: desc,
+    description: mapDesc,
     about: { '@type': 'Place', name: m.place },
     areaServed: { '@type': 'City', name: m.place.split(',')[0] },
     publisher: {
@@ -100,11 +140,11 @@ export async function onRequest(context) {
     .on('title', { element(el) { el.setInnerContent(title) } })
     .on('meta[name="description"]', setAttr('content', desc))
     .on('meta[name="theme-color"]', setAttr('content', m.theme))
-    .on('meta[property="og:title"]', setAttr('content', `${m.name} Map`))
+    .on('meta[property="og:title"]', setAttr('content', ogTitle))
     .on('meta[property="og:description"]', setAttr('content', ogDesc))
-    .on('meta[property="og:url"]', setAttr('content', m.url))
+    .on('meta[property="og:url"]', setAttr('content', canonical))
     .on('meta[property="og:site_name"]', setAttr('content', m.name))
-    .on('link[rel="canonical"]', setAttr('href', m.url))
+    .on('link[rel="canonical"]', setAttr('href', canonical))
     .on('head', { element(el) { el.append(headExtra, { html: true }) } })
     .transform(res)
 }
