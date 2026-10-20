@@ -396,6 +396,13 @@ export default function Page() {
   const sans = { fontFamily: "Arial, Helvetica, sans-serif" };
   const sheetOpen = sheet !== "hidden";
 
+  // Does another pin cover the same story? If so, a parcel must sit right at the
+  // selected pin to show (so one development's sale price never bleeds onto a
+  // sibling pin); a story with a single pin has no such ambiguity.
+  const selectedSlug = selected ? slugFromArticles(selected.articles, SITE.homeUrl) : null;
+  const articleShared = !!selectedSlug &&
+    SITES.filter((s) => slugFromArticles(s.articles, SITE.homeUrl) === selectedSlug).length > 1;
+
   return (
     <div className="flex flex-col bg-white overflow-hidden" style={{ ...sans, height: "100dvh" }}>
 
@@ -464,7 +471,7 @@ export default function Page() {
                   style={{ color: BRAND }}>
                   ← All sites
                 </button>
-                <SiteDetail site={selected} onClose={() => setSelected(null)} onPdf={() => setPdfOpen(true)} />
+                <SiteDetail site={selected} articleShared={articleShared} onClose={() => setSelected(null)} onPdf={() => setPdfOpen(true)} />
               </div>
             ) : (
               <SiteList
@@ -565,7 +572,7 @@ export default function Page() {
                     className="w-8 h-8 flex items-center justify-center rounded-full text-black/40 hover:bg-black/5 text-lg">✕</button>
                 </div>
                 <div className="overflow-y-auto">
-                  <SiteDetail site={selected} onClose={() => setSheet("hidden")} onPdf={() => setPdfOpen(true)} />
+                  <SiteDetail site={selected} articleShared={articleShared} onClose={() => setSheet("hidden")} onPdf={() => setPdfOpen(true)} />
                 </div>
               </>
             )}
@@ -594,7 +601,7 @@ export default function Page() {
 // The property signal + key assessor facts behind a pin, from ATLAS (GRID Real
 // Estate). Keyed off the pin's tied story (parsed from its article links).
 // Renders nothing when the pin has no story or ATLAS has no parcel for it.
-function ParcelFacts({ site }: { site: DevelopmentSite }) {
+function ParcelFacts({ site, articleShared }: { site: DevelopmentSite; articleShared: boolean }) {
   const SITE = resolveMapSite();
   const [parcels, setParcels] = useState<Parcel[] | null>(null);
   useEffect(() => {
@@ -620,7 +627,11 @@ function ParcelFacts({ site }: { site: DevelopmentSite }) {
     const nearest = geoParcels
       .map((pc) => ({ pc, d: distMeters(site.lat, site.lng, pc.lat as number, pc.lng as number) }))
       .sort((a, b) => a.d - b.d)[0];
-    p = nearest.d <= 250 ? nearest.pc : null; // ~250m: same lot/block, not a different pin
+    // When several pins share this story, a parcel must be right at THIS pin
+    // (~250m) to avoid showing a sibling's. When this pin is the story's only
+    // one, there's no ambiguity, so allow a generous radius (large tracts are
+    // fine; only a gross geocode error is excluded).
+    p = nearest.d <= (articleShared ? 250 : 2000) ? nearest.pc : null;
   } else {
     p = parcels[0]; // no coords to match on — keep legacy behavior
   }
@@ -665,7 +676,7 @@ function ParcelFacts({ site }: { site: DevelopmentSite }) {
   );
 }
 
-function SiteDetail({ site, onClose, onPdf }: { site: DevelopmentSite; onClose: () => void; onPdf: () => void }) {
+function SiteDetail({ site, articleShared, onClose, onPdf }: { site: DevelopmentSite; articleShared: boolean; onClose: () => void; onPdf: () => void }) {
   const sans = { fontFamily: "Arial, Helvetica, sans-serif" };
   const [copied, setCopied] = useState(false);
 
@@ -705,7 +716,7 @@ function SiteDetail({ site, onClose, onPdf }: { site: DevelopmentSite; onClose: 
       <div className="px-4 pb-3">
         <p className="text-sm text-neutral-700 leading-5">{site.description}</p>
       </div>
-      <ParcelFacts site={site} />
+      <ParcelFacts site={site} articleShared={articleShared} />
       {site.articles.length > 0 && (
         <div className="px-4 pb-3">
           <div className="text-[10px] font-semibold uppercase tracking-widest text-black/40 mb-2">Coverage</div>
