@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { SITES as BUNDLED_SITES, DevelopmentSite, SiteStatus } from "../data/sites";
 import { resolveMapSite } from "../data/mapSite";
-import { fetchParcels, slugFromArticles, leadSignal, usd, num, fmtMonth, Parcel } from "../data/atlas";
+import { fetchParcels, slugFromArticles, leadSignal, usd, num, fmtMonth, distMeters, Parcel } from "../data/atlas";
 
 // Module-level brand colour (used by SiteDetail/SiteList too). Resolved from the
 // build-time NEXT_PUBLIC_MAP_SITE; the header/center also re-resolve per render.
@@ -608,7 +608,23 @@ function ParcelFacts({ site }: { site: DevelopmentSite }) {
   }, [site.id]);
 
   if (!parcels || parcels.length === 0) return null;
-  const p = parcels[0];
+  // An article can cover several developments (e.g. Freddy's + Church's + Chipotle),
+  // each its own map pin, while ATLAS ties parcels to the story. Show only the
+  // parcel that actually sits on THIS pin — the nearest one, and only when it's
+  // genuinely at this location — so one pin never shows another's sale price.
+  // Falls back to the first parcel only when coordinates are missing.
+  const geoPin = Number.isFinite(site.lat) && Number.isFinite(site.lng);
+  const geoParcels = parcels.filter((p) => Number.isFinite(p.lat as number) && Number.isFinite(p.lng as number));
+  let p: Parcel | null;
+  if (geoPin && geoParcels.length > 0) {
+    const nearest = geoParcels
+      .map((pc) => ({ pc, d: distMeters(site.lat, site.lng, pc.lat as number, pc.lng as number) }))
+      .sort((a, b) => a.d - b.d)[0];
+    p = nearest.d <= 250 ? nearest.pc : null; // ~250m: same lot/block, not a different pin
+  } else {
+    p = parcels[0]; // no coords to match on — keep legacy behavior
+  }
+  if (!p) return null;
   const lead = leadSignal(p);
   const toneStyle =
     lead?.tone === "amber" ? { borderColor: "#fcd34d", background: "#fffbeb", color: "#92400e" }

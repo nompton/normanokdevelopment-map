@@ -14,6 +14,8 @@ export interface Permit {
 export interface Parcel {
   account: string;
   address?: string | null;
+  lat?: number | null;
+  lng?: number | null;
   salePrice?: number | null;
   saleDate?: string | null;
   sqft?: number | null;
@@ -33,6 +35,15 @@ export interface Lead {
   label: string;
   detail: string;
   date: string;
+}
+
+// Great-circle distance in meters — used to match a parcel to the map pin it
+// actually sits on, so one article's parcel never shows on a different pin.
+export function distMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371000, toRad = (d: number) => (d * Math.PI) / 180;
+  const p1 = toRad(lat1), p2 = toRad(lat2), dp = toRad(lat2 - lat1), dl = toRad(lng2 - lng1);
+  const a = Math.sin(dp / 2) ** 2 + Math.cos(p1) * Math.cos(p2) * Math.sin(dl / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
 }
 
 export const usd = (n: number | null | undefined) => (n == null ? null : "$" + Number(n).toLocaleString());
