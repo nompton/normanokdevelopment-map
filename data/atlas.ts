@@ -123,9 +123,13 @@ export function slugFromArticles(articles: { url?: string }[] | undefined, newsO
 // never show another city's data). Returns [] on any error.
 export async function fetchParcels(slug: string, siteKey: string): Promise<Parcel[]> {
   try {
-    const r = await fetch(`${ATLAS}/api/public/development?slug=${encodeURIComponent(slug)}&site=${encodeURIComponent(siteKey)}`, { cache: "no-store" });
+    // Norman + Noble share Cleveland County data (ATLAS keys it under 'norman');
+    // Bixby (Tulsa) isn't covered. Ask for — and verify the echo against — the
+    // Cleveland key for Noble, so Noble pins show parcels and Bixby stays empty.
+    const county = siteKey === "noble" ? "norman" : siteKey;
+    const r = await fetch(`${ATLAS}/api/public/development?slug=${encodeURIComponent(slug)}&site=${encodeURIComponent(county)}`, { cache: "no-store" });
     const d = await r.json();
-    if (d && (!d.site || d.site === siteKey) && Array.isArray(d.parcels)) return d.parcels as Parcel[];
+    if (d && (!d.site || d.site === county) && Array.isArray(d.parcels)) return d.parcels as Parcel[];
     return [];
   } catch { return []; }
 }
