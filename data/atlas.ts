@@ -47,6 +47,14 @@ export function distMeters(lat1: number, lng1: number, lat2: number, lng2: numbe
   return 2 * R * Math.asin(Math.sqrt(a));
 }
 
+// Assessor rows for raw/assembled land often carry a placeholder address like
+// "1 Unknown" / "0 Unknown"; treat those as no address so the curator label leads.
+export function cleanAddr(a: string | null | undefined): string | null {
+  const s = String(a || "").trim();
+  if (!s || /^\d*\s*unknown\b/i.test(s)) return null;
+  return s;
+}
+
 export const usd = (n: number | null | undefined) => (n == null ? null : "$" + Number(n).toLocaleString());
 export const num = (n: number | null | undefined) => (n == null ? null : Number(n).toLocaleString());
 export function usdShort(n: number | null | undefined): string | null {

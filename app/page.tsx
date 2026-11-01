@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { SITES as BUNDLED_SITES, DevelopmentSite, SiteStatus } from "../data/sites";
 import { resolveMapSite } from "../data/mapSite";
-import { fetchParcels, slugFromArticles, leadSignal, usd, num, fmtMonth, distMeters, Parcel } from "../data/atlas";
+import { fetchParcels, slugFromArticles, leadSignal, usd, num, fmtMonth, distMeters, cleanAddr, Parcel } from "../data/atlas";
 
 // Module-level brand colour (used by SiteDetail/SiteList too). Resolved from the
 // build-time NEXT_PUBLIC_MAP_SITE; the header/center also re-resolve per render.
@@ -652,12 +652,17 @@ function ParcelFacts({ site, articleShared }: { site: DevelopmentSite; articleSh
   return (
     <div className="px-4 pb-3">
       <div className="text-[10px] font-semibold uppercase tracking-widest text-black/40 mb-2">Property</div>
-      {(p.note || p.address) && (
-        <div className="mb-2">
-          {p.note && <div className="text-xs font-semibold text-neutral-800 leading-snug">{p.note}</div>}
-          {p.address && <div className="text-[10px] text-black/45">{p.address}</div>}
-        </div>
-      )}
+      {(() => {
+        const addr = cleanAddr(p.address);
+        const title = p.note || addr;
+        const sub = p.note ? addr : null;
+        return title ? (
+          <div className="mb-2">
+            <div className="text-xs font-semibold text-neutral-800 leading-snug">{title}</div>
+            {sub && <div className="text-[10px] text-black/45">{sub}</div>}
+          </div>
+        ) : null;
+      })()}
       {lead && (
         <div className="mb-2 flex items-start gap-2 rounded-lg border px-3 py-2" style={toneStyle}>
           <span aria-hidden="true" className="text-sm leading-5">{lead.icon}</span>
