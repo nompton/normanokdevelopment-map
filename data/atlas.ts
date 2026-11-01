@@ -26,6 +26,7 @@ export interface Parcel {
   subdivision?: string | null;
   owner?: string | null;
   investorOwned?: boolean;
+  note?: string | null; // curator's label for this parcel on the story (e.g. "Freddy's pad site")
   permits?: Permit[];
 }
 export interface Lead {

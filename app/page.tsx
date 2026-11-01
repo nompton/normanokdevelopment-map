@@ -652,6 +652,12 @@ function ParcelFacts({ site, articleShared }: { site: DevelopmentSite; articleSh
   return (
     <div className="px-4 pb-3">
       <div className="text-[10px] font-semibold uppercase tracking-widest text-black/40 mb-2">Property</div>
+      {(p.note || p.address) && (
+        <div className="mb-2">
+          {p.note && <div className="text-xs font-semibold text-neutral-800 leading-snug">{p.note}</div>}
+          {p.address && <div className="text-[10px] text-black/45">{p.address}</div>}
+        </div>
+      )}
       {lead && (
         <div className="mb-2 flex items-start gap-2 rounded-lg border px-3 py-2" style={toneStyle}>
           <span aria-hidden="true" className="text-sm leading-5">{lead.icon}</span>
