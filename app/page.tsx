@@ -682,7 +682,11 @@ function ParcelFacts({ site, articleShared }: { site: DevelopmentSite; articleSh
           ))}
         </dl>
       )}
-      <div className="mt-1.5 text-[10px] text-black/35">Parcel data via GRID Real Estate</div>
+      <a href={GRID_URL} target="_blank" rel="noopener noreferrer"
+        className="mt-2 flex items-center gap-1.5 text-[10px] text-black/40 hover:text-black/70 transition-colors">
+        <img src="/grid-icon.svg" alt="" className="h-3.5 w-3.5 object-contain" />
+        <span>Parcel intelligence powered by <span className="font-bold text-neutral-700">GRID Real Estate</span></span>
+      </a>
     </div>
   );
 }
