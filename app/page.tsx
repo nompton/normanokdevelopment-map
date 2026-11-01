@@ -21,6 +21,14 @@ const STATUS_CONFIG: Record<SiteStatus, { label: string; color: string; dot: str
 
 const ALL_STATUSES = Object.keys(STATUS_CONFIG) as SiteStatus[];
 
+// Pin stacking by status: completed sits at the bottom, cancelled above it, and
+// every active status ("the others") on top — so a finished or dead project
+// never covers a live one. Offsets are large enough to dominate Leaflet's
+// latitude-based z within each tier; the selected pin overrides all of them.
+const STATUS_Z: Partial<Record<SiteStatus, number>> = { completed: -100000, cancelled: -50000 };
+const zForStatus = (status: SiteStatus) => STATUS_Z[status] ?? 0;
+const SELECTED_Z = 200000;
+
 // Marker glyph. The selected site gets a larger dot with a soft ring so it
 // stands out from the field and ties the list/detail selection to the map.
 function markerHtml(dot: string, selected: boolean): string {
@@ -192,7 +200,7 @@ export default function Page() {
     markersRef.current = {};
     SITES.forEach((site) => {
       const cfg = STATUS_CONFIG[site.status];
-      const marker = L.marker([site.lat, site.lng], { icon: markerIcon(L, cfg.dot, false), title: site.name });
+      const marker = L.marker([site.lat, site.lng], { icon: markerIcon(L, cfg.dot, false), title: site.name, zIndexOffset: zForStatus(site.status) });
       // Hover label so a dot is identifiable without opening it.
       marker.bindTooltip(site.name, { direction: "top", offset: [0, -8], opacity: 0.95 });
       marker.on("click", () => { setSelected(site); setSheet("detail"); });
@@ -212,7 +220,7 @@ export default function Page() {
       if (!m) return;
       const sel = selected?.id === site.id;
       m.setIcon(markerIcon(L, STATUS_CONFIG[site.status].dot, sel));
-      m.setZIndexOffset(sel ? 1000 : 0);
+      m.setZIndexOffset(sel ? SELECTED_Z : zForStatus(site.status));
     });
   }, [selected, SITES, mapReady]);
 
