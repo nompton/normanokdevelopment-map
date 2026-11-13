@@ -34,6 +34,7 @@ export interface DevelopmentSite {
   description: string;
   articles: Article[];
   planPdf?: string;
+  image?: string; // newest linked story's cover photo (from /api/sites)
 }
 
 export const SITES: DevelopmentSite[] = [

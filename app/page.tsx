@@ -106,11 +106,20 @@ export default function Page() {
   // rewrites them per host, but Next re-applies the build-time (Norman) metadata
   // on hydration. Re-assert the resolved city's title/description on the client
   // so Bixby/Noble tabs don't read "Norman Development Map".
+  // A selected project (incl. a ?site= deep link) titles the tab with its name —
+  // matching what the middleware serves — so Google's rendered title for each
+  // pin URL in the sitemap is the project, not the generic map. Hydration also
+  // restores Norman's favicon, so point the icon links back at this city's.
   useEffect(() => {
-    document.title = `${SITE.name} Map — ${SITE.place}`;
+    document.title = selected ? `${selected.name} — ${SITE.name} Map` : `${SITE.name} Map — ${SITE.place}`;
     const desc = document.querySelector('meta[name="description"]');
-    if (desc) desc.setAttribute("content", `Interactive map of commercial and residential development projects across ${SITE.place}. Track proposed, planned, and under-construction projects with site plans and coverage from ${SITE.name}.`);
-  }, [SITE.key]);
+    if (desc) desc.setAttribute("content", selected
+      ? `${selected.name}${selected.address ? ` · ${selected.address}` : ""} — ${STATUS_CONFIG[selected.status]?.label || "Development"} in ${SITE.place}.${selected.description ? " " + selected.description.replace(/\s+/g, " ").trim() : ""}`.slice(0, 300)
+      : `Interactive map of commercial and residential development projects across ${SITE.place}. Track proposed, planned, and under-construction projects with site plans and coverage from ${SITE.name}.`);
+    const icon = SITE.key === "norman" ? "/icon.png" : `/icon-${SITE.key}.png`;
+    document.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"], link[rel="apple-touch-icon"]')
+      .forEach((l) => l.setAttribute("href", icon));
+  }, [SITE.key, selected]);
 
   // ── MAP INIT ──────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -699,6 +708,18 @@ function ParcelFacts({ site, articleShared }: { site: DevelopmentSite; articleSh
   );
 }
 
+// The project's photo (its newest story's cover), linking to that story. Hidden
+// if the image fails, so a broken photo never leaves an empty box.
+function SitePhoto({ src, alt, href }: { src: string; alt: string; href?: string }) {
+  const [ok, setOk] = useState(true);
+  if (!ok) return null;
+  const img = (
+    <img src={src} alt={alt} loading="lazy" onError={() => setOk(false)}
+      className="block h-40 w-full object-cover bg-black/[0.04]" />
+  );
+  return href ? <a href={href} target="_blank" rel="noopener noreferrer" aria-label={`Read the latest story: ${alt}`}>{img}</a> : img;
+}
+
 function SiteDetail({ site, articleShared, onClose, onPdf }: { site: DevelopmentSite; articleShared: boolean; onClose: () => void; onPdf: () => void }) {
   const sans = { fontFamily: "Arial, Helvetica, sans-serif" };
   const [copied, setCopied] = useState(false);
@@ -720,6 +741,10 @@ function SiteDetail({ site, articleShared, onClose, onPdf }: { site: Development
   return (
     <div className="flex flex-col" style={sans}>
       <div className="h-1 w-full shrink-0" style={{ background: BRAND }} />
+      {site.image && (
+        <SitePhoto key={site.id} src={site.image} alt={site.name}
+          href={[...site.articles].sort((a, b) => (Date.parse(b.date) || 0) - (Date.parse(a.date) || 0))[0]?.url} />
+      )}
       <div className="px-4 pt-4 pb-2">
         <StatusBadge status={site.status} />
         <h2 className="mt-2 text-base font-bold text-neutral-900 leading-snug">{site.name}</h2>
