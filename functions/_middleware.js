@@ -101,8 +101,21 @@ export async function onRequest(context) {
   const desc = proj
     ? `${proj.name}${proj.address ? ` · ${proj.address}` : ''} — ${STATUS_LABEL[proj.status] || 'Development'} in ${m.place}.${projDesc ? ' ' + projDesc : ''}`.slice(0, 300)
     : mapDesc
-  const ogDesc = proj ? (projDesc.slice(0, 200) || `Track development projects across ${m.place}.`) : `Track development projects across ${m.place}.`
+  // Pins with no written description still get a useful card: where it stands,
+  // where it is, and the latest story about it.
+  const latest = proj ? [...(proj.articles || [])].sort((a, b) => (Date.parse(b && b.date) || 0) - (Date.parse(a && a.date) || 0))[0] : null
+  const projFallback = proj
+    ? [`${STATUS_LABEL[proj.status] || 'Development'}${proj.address ? ` · ${proj.address}` : ''}.`, latest && latest.title ? `Latest: ${latest.title}.` : `Track development projects across ${m.place}.`].join(' ')
+    : ''
+  const ogDesc = proj ? (projDesc.slice(0, 200) || projFallback) : `Track development projects across ${m.place}.`
   const canonical = proj ? `${m.url}/?site=${encodeURIComponent(proj.id)}` : m.url
+  // The static build bakes in Norman's icon everywhere; use this city's, or the
+  // project's story photo (from /api/sites `image`) for a pin deep link.
+  const iconUrl = m.url + m.icon
+  const projImage = proj && /^https:\/\//.test(proj.image || '') ? proj.image : ''
+  const ogImage = projImage || iconUrl
+  const ogImageAlt = projImage ? proj.name : `${m.name} Map`
+  const sizeMeta = projImage ? { element(el) { el.remove() } } : null // story photos vary in size; the icon is 512²
 
   // Structured data: a WebApplication (the map tool) published by the local news
   // Organization, plus the geographic area it serves. Helps Google understand
@@ -145,6 +158,17 @@ export async function onRequest(context) {
     .on('meta[property="og:url"]', setAttr('content', canonical))
     .on('meta[property="og:site_name"]', setAttr('content', m.name))
     .on('link[rel="canonical"]', setAttr('href', canonical))
+    .on('link[rel="icon"]', setAttr('href', m.icon))
+    .on('link[rel="shortcut icon"]', setAttr('href', m.icon))
+    .on('link[rel="apple-touch-icon"]', setAttr('href', m.icon))
+    .on('meta[property="og:image"]', setAttr('content', ogImage))
+    .on('meta[property="og:image:alt"]', setAttr('content', ogImageAlt))
+    .on('meta[property="og:image:width"]', sizeMeta || setAttr('content', '512'))
+    .on('meta[property="og:image:height"]', sizeMeta || setAttr('content', '512'))
+    .on('meta[name="twitter:card"]', setAttr('content', projImage ? 'summary_large_image' : 'summary'))
+    .on('meta[name="twitter:title"]', setAttr('content', ogTitle))
+    .on('meta[name="twitter:description"]', setAttr('content', ogDesc))
+    .on('meta[name="twitter:image"]', setAttr('content', ogImage))
     .on('head', { element(el) { el.append(headExtra, { html: true }) } })
     .transform(res)
 }
