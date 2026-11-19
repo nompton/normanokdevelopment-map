@@ -262,7 +262,18 @@ export default function Page() {
     if (s) {
       setSelected(s);
       setSheet("detail");
-      const fly = () => mapInstanceRef.current?.flyTo([s.lat, s.lng], 17, { duration: 0.8 });
+      // flyTo needs a laid-out map; in a hidden/zero-size tab Leaflet computes a
+      // NaN path and throws, which would take the whole page down. Jump instead,
+      // and never let a camera move crash the app.
+      const fly = () => {
+        const map = mapInstanceRef.current;
+        if (!map) return;
+        try {
+          const size = map.getSize();
+          if (size.x > 0 && size.y > 0) map.flyTo([s.lat, s.lng], 17, { duration: 0.8 });
+          else map.setView([s.lat, s.lng], 17, { animate: false });
+        } catch { try { map.setView([s.lat, s.lng], 17, { animate: false }); } catch { /* ignore */ } }
+      };
       mapReady ? fly() : setTimeout(fly, 400);
     }
   }, [SITES, mapReady, dataState]);
