@@ -115,7 +115,15 @@ export async function onRequest(context) {
   const projImage = proj && /^https:\/\//.test(proj.image || '') ? proj.image : ''
   const ogImage = projImage || iconUrl
   const ogImageAlt = projImage ? proj.name : `${m.name} Map`
-  const sizeMeta = projImage ? { element(el) { el.remove() } } : null // story photos vary in size; the icon is 512²
+  // Story photo URLs carry their size (/img/posts/…?w=1500&h=1000). Declaring it
+  // lets Facebook render the large card on the very first share; without a
+  // size we drop the tags rather than claim the icon's 512².
+  let imgW = '512', imgH = '512'
+  if (projImage) {
+    try { const q = new URL(projImage).searchParams; imgW = /^\d+$/.test(q.get('w') || '') ? q.get('w') : ''; imgH = /^\d+$/.test(q.get('h') || '') ? q.get('h') : '' } catch { imgW = imgH = '' }
+    if (!imgW || !imgH) imgW = imgH = ''
+  }
+  const sizeTag = (v) => v ? setAttr('content', v) : { element(el) { el.remove() } }
 
   // Structured data: a WebApplication (the map tool) published by the local news
   // Organization, plus the geographic area it serves. Helps Google understand
@@ -163,8 +171,8 @@ export async function onRequest(context) {
     .on('link[rel="apple-touch-icon"]', setAttr('href', m.icon))
     .on('meta[property="og:image"]', setAttr('content', ogImage))
     .on('meta[property="og:image:alt"]', setAttr('content', ogImageAlt))
-    .on('meta[property="og:image:width"]', sizeMeta || setAttr('content', '512'))
-    .on('meta[property="og:image:height"]', sizeMeta || setAttr('content', '512'))
+    .on('meta[property="og:image:width"]', sizeTag(imgW))
+    .on('meta[property="og:image:height"]', sizeTag(imgH))
     .on('meta[name="twitter:card"]', setAttr('content', projImage ? 'summary_large_image' : 'summary'))
     .on('meta[name="twitter:title"]', setAttr('content', ogTitle))
     .on('meta[name="twitter:description"]', setAttr('content', ogDesc))
