@@ -1,0 +1,13 @@
+# Cloudflare Pages headers (copied into out/ by the static export).
+
+# Next's hashed build assets are content-addressed — cache them forever.
+/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Every map host is HTTPS-only behind Cloudflare — pin it for a year (no
+# preload, so it stays reversible). Geolocation stays allowed for this origin
+# only: the "locate me" button uses it. No X-Frame-Options/frame-ancestors —
+# the map may be embedded elsewhere, and it has no signed-in actions to protect.
+/*
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Permissions-Policy: geolocation=(self), camera=(), microphone=(), payment=()

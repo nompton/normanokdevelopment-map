@@ -255,6 +255,9 @@ export default function Page() {
     if (!id) { deepLinkApplied.current = true; return; }
     if (SITES.length === 0) return; // wait for data
     const s = SITES.find(x => x.id === id);
+    // Norman starts from the bundled list, which lacks pins added in the admin
+    // since the last build — keep waiting for the live API before giving up.
+    if (!s && dataState === "loading") return;
     deepLinkApplied.current = true;
     if (s) {
       setSelected(s);
@@ -262,7 +265,16 @@ export default function Page() {
       const fly = () => mapInstanceRef.current?.flyTo([s.lat, s.lng], 17, { duration: 0.8 });
       mapReady ? fly() : setTimeout(fly, 400);
     }
-  }, [SITES, mapReady]);
+  }, [SITES, mapReady, dataState]);
+
+  // When the live list replaces the bundled one, swap a selection made from the
+  // bundle for its live copy (current status, edits, photo).
+  useEffect(() => {
+    if (!selected) return;
+    const fresh = SITES.find(x => x.id === selected.id);
+    if (fresh && fresh !== selected) setSelected(fresh);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [SITES]);
 
   // Keep ?site=<id> in sync with the selection so a project is shareable — but
   // only after the initial deep link is resolved, so we never wipe the incoming
